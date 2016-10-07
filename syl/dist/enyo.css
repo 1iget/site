@@ -171,6 +171,21 @@ body .enyo-fullscreen {
   background-size: cover;
 }
 
+.enyo-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.enyo-image.sized {
+  display: inline-block;
+}
+.enyo-image.contain {
+  background-size: contain;
+}
+.enyo-image.cover {
+  background-size: cover;
+}
+
 .enyo-thumb {
   position: absolute;
   -moz-box-sizing: border-box;

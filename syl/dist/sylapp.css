@@ -1,11 +1,12 @@
-.panels-sample-flickr-panels {
-  padding-top: 10px;
-}
 .demo-card-wide {
   margin-left: auto;
   margin-right: auto;
 }
 .login-panel {
+  background-color: #CCE2CD !important;
+}
+
+.signup-panel {
   background-color: #CCE2CD !important;
 }
 
@@ -65,6 +66,11 @@ body {
 }
 .panels-sample-flickr-image.tall {
   height: 100%;
+}
+.chrome-card-wide {
+  width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 body {
@@ -6630,5 +6636,28 @@ iframe.heightSet {
 }
 .demo-wrapper iframe {
   border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+/* fallback */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(https://fonts.gstatic.com/s/materialicons/v18/2fcrYFNaTjcS6g4U3t-Y5UEw0lE80llgEseQY3FEmqw.woff2) format('woff2');
+}
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 

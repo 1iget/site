@@ -244,6 +244,59 @@ flush = function () {
 add("DOMContentLoaded", init);
 add("readystatechange", init);
 
+}],'enyo/json':[function (module,exports,global,require,request){
+require('enyo');
+
+
+/**
+* [JSON]{@glossary JSON} related methods and wrappers.
+*
+* @module enyo/json
+* @public
+*/
+module.exports = {
+	
+	/**
+	* Wrapper for [JSON.stringify()]{@glossary JSON.stringify}. Creates a
+	* [JSON]{@glossary JSON} [string]{@glossary String} from an
+	* [object]{@glossary Object}.
+	*
+	* @see {@glossary JSON.stringify}
+	* @param {Object} value - The [object]{@glossary Object} to convert to a
+	*	[JSON]{@glossary JSON} [string]{@glossary String}.
+	* @param {(Function|String[])} [replacer] An optional parameter indicating either an
+	*	[array]{@glossary Array} of keys to include in the final output or a
+	*	[function]{@glossary Function} that will have the opportunity to dynamically return
+	*	values to include for keys.
+	* @param {(Number|String)} [space] - Determines the spacing (if any) for pretty-printed
+	*	output of the JSON string. A [number]{@glossary Number} indicates the number of
+	* spaces to use in the output, while a string will be used verbatim.
+	* @returns {String} The JSON string for the given object.
+	* @public
+	*/
+	stringify: function(value, replacer, space) {
+		return JSON.stringify(value, replacer, space);
+	},
+	
+	/**
+	* Wrapper for [JSON.parse()]{@glossary JSON.parse}. Parses a valid
+	* [JSON]{@glossary JSON} [string]{@glossary String} and returns an
+	* [object]{@glossary Object}, or `null` if the parameters are invalid.
+	*
+	* @see {@glossary JSON.parse}
+	* @param {String} json - The [JSON]{@glossary JSON} [string]{@glossary String} to
+	*	parse into an [object]{@glossary Object}.
+	* @param {Function} [reviver] - The optional [function]{@glossary Function} to use to
+	*	parse individual keys of the return object.
+	* @returns {(Object|null)} If parameters are valid, an [object]{@glossary Object}
+	* is returned; otherwise, `null`.
+	* @public
+	*/
+	parse: function(json, reviver) {
+		return json ? JSON.parse(json, reviver) : null;
+	}
+};
+
 }],'enyo/utils':[function (module,exports,global,require,request){
 require('enyo');
 
@@ -1486,59 +1539,6 @@ var rtlPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\u
 exports.isRtl = function (str) {
 	return rtlPattern.test(str);
 };
-}],'enyo/json':[function (module,exports,global,require,request){
-require('enyo');
-
-
-/**
-* [JSON]{@glossary JSON} related methods and wrappers.
-*
-* @module enyo/json
-* @public
-*/
-module.exports = {
-	
-	/**
-	* Wrapper for [JSON.stringify()]{@glossary JSON.stringify}. Creates a
-	* [JSON]{@glossary JSON} [string]{@glossary String} from an
-	* [object]{@glossary Object}.
-	*
-	* @see {@glossary JSON.stringify}
-	* @param {Object} value - The [object]{@glossary Object} to convert to a
-	*	[JSON]{@glossary JSON} [string]{@glossary String}.
-	* @param {(Function|String[])} [replacer] An optional parameter indicating either an
-	*	[array]{@glossary Array} of keys to include in the final output or a
-	*	[function]{@glossary Function} that will have the opportunity to dynamically return
-	*	values to include for keys.
-	* @param {(Number|String)} [space] - Determines the spacing (if any) for pretty-printed
-	*	output of the JSON string. A [number]{@glossary Number} indicates the number of
-	* spaces to use in the output, while a string will be used verbatim.
-	* @returns {String} The JSON string for the given object.
-	* @public
-	*/
-	stringify: function(value, replacer, space) {
-		return JSON.stringify(value, replacer, space);
-	},
-	
-	/**
-	* Wrapper for [JSON.parse()]{@glossary JSON.parse}. Parses a valid
-	* [JSON]{@glossary JSON} [string]{@glossary String} and returns an
-	* [object]{@glossary Object}, or `null` if the parameters are invalid.
-	*
-	* @see {@glossary JSON.parse}
-	* @param {String} json - The [JSON]{@glossary JSON} [string]{@glossary String} to
-	*	parse into an [object]{@glossary Object}.
-	* @param {Function} [reviver] - The optional [function]{@glossary Function} to use to
-	*	parse individual keys of the return object.
-	* @returns {(Object|null)} If parameters are valid, an [object]{@glossary Object}
-	* is returned; otherwise, `null`.
-	* @public
-	*/
-	parse: function(json, reviver) {
-		return json ? JSON.parse(json, reviver) : null;
-	}
-};
-
 }],'enyo/AjaxProperties':[function (module,exports,global,require,request){
 require('enyo');
 
@@ -4300,7 +4300,96 @@ module.exports = {
 	}
 };
 
-},{'../dom':'enyo/dom','../platform':'enyo/platform','../utils':'enyo/utils'}],'enyo/Control/floatingLayer':[function (module,exports,global,require,request){
+},{'../dom':'enyo/dom','../platform':'enyo/platform','../utils':'enyo/utils'}],'enyo/Layout':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Layout~Layout} kind.
+* @module enyo/Layout
+*/
+
+var
+	kind = require('./kind');
+
+/**
+* {@link module:enyo/Layout~Layout} is the base [kind]{@glossary kind} for layout
+* kinds. Layout kinds are used by {@link module:enyo/UiComponent~UiComponent}-based
+* [controls]{@link module:enyo/Control~Control} to allow for arranging of child controls by
+* setting the [layoutKind]{@link module:enyo/UiComponent~UiComponent#layoutKind} property.
+* 
+* Derived kinds will usually provide their own
+* [layoutClass]{@link module:enyo/Layout~Layout#layoutClass} property to affect the CSS
+* rules used, and may also implement the [flow()]{@link module:enyo/Layout~Layout#flow}
+* and [reflow()]{@link module:enyo/Layout~Layout#reflow} methods. `flow()` is called
+* during control rendering, while `reflow()` is called when the associated
+* control is resized.
+*
+* @class Layout
+* @public
+*/
+module.exports = kind(
+	/** @lends module:enyo/Layout~Layout.prototype */ {
+
+	name: 'enyo.Layout',
+
+	/**
+	* @private
+	*/
+	kind: null,
+
+	/** 
+	* CSS class that's added to the [control]{@link module:enyo/Control~Control} using this 
+	* [layout]{@link module:enyo/Layout~Layout} [kind]{@glossary kind}.
+	*
+	* @type {String}
+	* @default ''
+	* @public
+	*/
+	layoutClass: '',
+	
+	/**
+	* @private
+	*/
+	constructor: function (container) {
+		this.container = container;
+		if (container) {
+			container.addClass(this.layoutClass);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	destroy: function () {
+		if (this.container) {
+			this.container.removeClass(this.layoutClass);
+		}
+	},
+	
+	/**
+	* Called during static property layout (i.e., during rendering).
+	*
+	* @public
+	*/
+	flow: function () {
+	},
+
+	/** 
+	* Called during dynamic measuring layout (i.e., during a resize).
+	*
+	* May short-circuit and return `true` if the layout needs to be
+	* redone when the associated Control is next shown. This is useful
+	* for cases where the Control itself has `showing` set to `true`
+	* but an ancestor is hidden, and the layout is therefore unable to
+	* get accurate measurements of the Control or its children.
+	*
+	* @public
+	*/
+	reflow: function () {
+	}
+});
+
+},{'./kind':'enyo/kind'}],'enyo/Control/floatingLayer':[function (module,exports,global,require,request){
 /**
 * Exports the {@link module:enyo/Control/floatingLayer~FloatingLayer} singleton instance.
 * @module enyo/Control/floatingLayer
@@ -4420,96 +4509,7 @@ module.exports = function (Control) {
 
 	return FloatingLayer;
 };
-},{'../kind':'enyo/kind','../platform':'enyo/platform'}],'enyo/Layout':[function (module,exports,global,require,request){
-require('enyo');
-
-/**
-* Contains the declaration for the {@link module:enyo/Layout~Layout} kind.
-* @module enyo/Layout
-*/
-
-var
-	kind = require('./kind');
-
-/**
-* {@link module:enyo/Layout~Layout} is the base [kind]{@glossary kind} for layout
-* kinds. Layout kinds are used by {@link module:enyo/UiComponent~UiComponent}-based
-* [controls]{@link module:enyo/Control~Control} to allow for arranging of child controls by
-* setting the [layoutKind]{@link module:enyo/UiComponent~UiComponent#layoutKind} property.
-* 
-* Derived kinds will usually provide their own
-* [layoutClass]{@link module:enyo/Layout~Layout#layoutClass} property to affect the CSS
-* rules used, and may also implement the [flow()]{@link module:enyo/Layout~Layout#flow}
-* and [reflow()]{@link module:enyo/Layout~Layout#reflow} methods. `flow()` is called
-* during control rendering, while `reflow()` is called when the associated
-* control is resized.
-*
-* @class Layout
-* @public
-*/
-module.exports = kind(
-	/** @lends module:enyo/Layout~Layout.prototype */ {
-
-	name: 'enyo.Layout',
-
-	/**
-	* @private
-	*/
-	kind: null,
-
-	/** 
-	* CSS class that's added to the [control]{@link module:enyo/Control~Control} using this 
-	* [layout]{@link module:enyo/Layout~Layout} [kind]{@glossary kind}.
-	*
-	* @type {String}
-	* @default ''
-	* @public
-	*/
-	layoutClass: '',
-	
-	/**
-	* @private
-	*/
-	constructor: function (container) {
-		this.container = container;
-		if (container) {
-			container.addClass(this.layoutClass);
-		}
-	},
-
-	/**
-	* @private
-	*/
-	destroy: function () {
-		if (this.container) {
-			this.container.removeClass(this.layoutClass);
-		}
-	},
-	
-	/**
-	* Called during static property layout (i.e., during rendering).
-	*
-	* @public
-	*/
-	flow: function () {
-	},
-
-	/** 
-	* Called during dynamic measuring layout (i.e., during a resize).
-	*
-	* May short-circuit and return `true` if the layout needs to be
-	* redone when the associated Control is next shown. This is useful
-	* for cases where the Control itself has `showing` set to `true`
-	* but an ancestor is hidden, and the layout is therefore unable to
-	* get accurate measurements of the Control or its children.
-	*
-	* @public
-	*/
-	reflow: function () {
-	}
-});
-
-},{'./kind':'enyo/kind'}],'enyo/ApplicationSupport':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../platform':'enyo/platform'}],'enyo/ApplicationSupport':[function (module,exports,global,require,request){
 /**
 * Exports the {@link module:enyo/ApplicationSupport~ApplicationSupport} mixin.
 * @module enyo/ApplicationSupport
@@ -10111,125 +10111,7 @@ module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./Component':'enyo/Component'}],'enyo/Signals':[function (module,exports,global,require,request){
-require('enyo');
-
-/**
-* Contains the declaration for the {@link module:enyo/Signals~Signals} kind.
-* @module enyo/Signals
-*/
-
-var
-	kind = require('./kind'),
-	utils = require('./utils');
-
-var
-	Component = require('./Component');
-
-/**
-* {@link module:enyo/Signals~Signals} is a [component]{@link module:enyo/Component~Component} used to listen
-* to global messages.
-* 
-* An object with a Signals component can listen to messages sent from anywhere
-* by declaring handlers for them.
-* 
-* DOM [events]{@glossary event} that have no node targets are broadcast as
-* signals. These events include Window events, such as `onload` and
-* `onbeforeunload`, as well as events that occur directly on `document`, such
-* as `onkeypress` if `document` has the focus.
-* 
-* For more information, see the documentation on [Event
-* Handling]{@linkplain $dev-guide/key-concepts/event-handling.html} in the
-* Enyo Developer Guide.
-*
-* @class Signals
-* @extends module:enyo/Component~Component
-* @public
-*/
-var Signals = module.exports = kind(
-	/** @lends module:enyo/Signals~Signals.prototype */ {
-
-	name: 'enyo.Signals',
-
-	/**
-	* @private
-	*/
-	kind: Component,
-
-	/**
-	* Needed because of early calls to bind DOM {@glossary event} listeners
-	* to the [enyo.Signals.send()]{@link module:enyo/Signals~Signals#send} call.
-	* 
-	* @private
-	*/
-
-
-	/**
-	* @method
-	* @private
-	*/
-	create: kind.inherit(function (sup) {
-		return function() {
-			sup.apply(this, arguments);
-			Signals.addListener(this);
-		};
-	}),
-
-	/**
-	* @method
-	* @private
-	*/
-	destroy: kind.inherit(function (sup) {
-		return function() {
-			Signals.removeListener(this);
-			sup.apply(this, arguments);
-		};
-	}),
-
-	/**
-	* @private
-	*/
-	notify: function (msg, load) {
-		this.dispatchEvent(msg, load);
-	},
-
-	/**
-	* @private
-	*/
-	protectedStatics: {
-		listeners: [],
-		addListener: function(listener) {
-			this.listeners.push(listener);
-		},
-		removeListener: function(listener) {
-			utils.remove(listener, this.listeners);
-		}
-	},
-
-	/**
-	* @private
-	*/
-	statics: 
-		/** @lends module:enyo/Signals~Signals.prototype */ {
-
-		/**
-		* Broadcasts a global message to be consumed by subscribers.
-		* 
-		* @param {String} msg - The message to send; usually the name of the
-		*	{@glossary event}.
-		* @param {Object} load - An [object]{@glossary Object} containing any
-		*	associated event properties to be accessed by subscribers.
-		* @public
-		*/
-		send: function (msg, load) {
-			utils.forEach(this.listeners, function(l) {
-				l.notify(msg, load);
-			});
-		}
-	}
-});
-
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./Component':'enyo/Component'}],'enyo/ScrollMath':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./Component':'enyo/Component'}],'enyo/ScrollMath':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -11018,7 +10900,125 @@ module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./platform':'enyo/platform','./animation':'enyo/animation','./Component':'enyo/Component'}],'enyo/master':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./platform':'enyo/platform','./animation':'enyo/animation','./Component':'enyo/Component'}],'enyo/Signals':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Signals~Signals} kind.
+* @module enyo/Signals
+*/
+
+var
+	kind = require('./kind'),
+	utils = require('./utils');
+
+var
+	Component = require('./Component');
+
+/**
+* {@link module:enyo/Signals~Signals} is a [component]{@link module:enyo/Component~Component} used to listen
+* to global messages.
+* 
+* An object with a Signals component can listen to messages sent from anywhere
+* by declaring handlers for them.
+* 
+* DOM [events]{@glossary event} that have no node targets are broadcast as
+* signals. These events include Window events, such as `onload` and
+* `onbeforeunload`, as well as events that occur directly on `document`, such
+* as `onkeypress` if `document` has the focus.
+* 
+* For more information, see the documentation on [Event
+* Handling]{@linkplain $dev-guide/key-concepts/event-handling.html} in the
+* Enyo Developer Guide.
+*
+* @class Signals
+* @extends module:enyo/Component~Component
+* @public
+*/
+var Signals = module.exports = kind(
+	/** @lends module:enyo/Signals~Signals.prototype */ {
+
+	name: 'enyo.Signals',
+
+	/**
+	* @private
+	*/
+	kind: Component,
+
+	/**
+	* Needed because of early calls to bind DOM {@glossary event} listeners
+	* to the [enyo.Signals.send()]{@link module:enyo/Signals~Signals#send} call.
+	* 
+	* @private
+	*/
+
+
+	/**
+	* @method
+	* @private
+	*/
+	create: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			Signals.addListener(this);
+		};
+	}),
+
+	/**
+	* @method
+	* @private
+	*/
+	destroy: kind.inherit(function (sup) {
+		return function() {
+			Signals.removeListener(this);
+			sup.apply(this, arguments);
+		};
+	}),
+
+	/**
+	* @private
+	*/
+	notify: function (msg, load) {
+		this.dispatchEvent(msg, load);
+	},
+
+	/**
+	* @private
+	*/
+	protectedStatics: {
+		listeners: [],
+		addListener: function(listener) {
+			this.listeners.push(listener);
+		},
+		removeListener: function(listener) {
+			utils.remove(listener, this.listeners);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	statics: 
+		/** @lends module:enyo/Signals~Signals.prototype */ {
+
+		/**
+		* Broadcasts a global message to be consumed by subscribers.
+		* 
+		* @param {String} msg - The message to send; usually the name of the
+		*	{@glossary event}.
+		* @param {Object} load - An [object]{@glossary Object} containing any
+		*	associated event properties to be accessed by subscribers.
+		* @public
+		*/
+		send: function (msg, load) {
+			utils.forEach(this.listeners, function(l) {
+				l.notify(msg, load);
+			});
+		}
+	}
+});
+
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./Component':'enyo/Component'}],'enyo/master':[function (module,exports,global,require,request){
 require('enyo');
 
 var
@@ -16726,7 +16726,7 @@ module.exports = kind(
 	accessibilityRole: 'img'
 });
 
-},{'../kind':'enyo/kind','../resolution':'enyo/resolution','../dispatcher':'enyo/dispatcher','../pathResolver':'enyo/pathResolver','../Control':'enyo/Control'}],'enyo/input':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../resolution':'enyo/resolution','../dispatcher':'enyo/dispatcher','../pathResolver':'enyo/pathResolver','../Control':'enyo/Control'}],'enyo/Input':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -17068,26 +17068,26 @@ module.exports = kind(
 	]
 });
 
-},{'../kind':'enyo/kind','../utils':'enyo/utils','../dispatcher':'enyo/dispatcher','../platform':'enyo/platform','../Control':'enyo/Control'}],'enyo/Input':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../utils':'enyo/utils','../dispatcher':'enyo/dispatcher','../platform':'enyo/platform','../Control':'enyo/Control'}],'enyo/Image':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
-* Contains the declaration for the {@link module:enyo/Input~Input} kind.
-* @module enyo/Input
+* Contains the declaration for the {@link module:enyo/Image~Image} kind.
+* @module enyo/Image
 */
 
 var
 	kind = require('../kind'),
-	utils = require('../utils'),
+	ri = require('../resolution'),
 	dispatcher = require('../dispatcher'),
-	platform = require('../platform');
+	path = require('../pathResolver');
 var
 	Control = require('../Control');
 
 /**
-* Fires immediately when the text changes.
+* Fires when the [image]{@link module:enyo/Image~Image} has loaded.
 *
-* @event module:enyo/Input~Input#oninput
+* @event module:enyo/Image~Image#onload
 * @type {Object}
 * @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
 *	propagated the {@glossary event}.
@@ -17096,10 +17096,9 @@ var
 */
 
 /**
-* Fires when the text has changed and the [input]{@link module:enyo/Input~Input} subsequently loses
-* focus.
+* Fires when there has been an error while loading the [image]{@link module:enyo/Image~Image}.
 *
-* @event module:enyo/Input~Input#onchange
+* @event module:enyo/Image~Image#onerror
 * @type {Object}
 * @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
 *	propagated the {@glossary event}.
@@ -17108,40 +17107,51 @@ var
 */
 
 /**
-* Fires when the [input]{@link module:enyo/Input~Input} is disabled or enabled.
+* {@link module:enyo/Image~Image} implements an HTML [&lt;img&gt;]{@glossary img} element and, optionally,
+* [bubbles]{@link module:enyo/Component~Component#bubble} the [onload]{@link module:enyo/Image~Image#onload} and
+* [onerror]{@link module:enyo/Image~Image#onerror} [events]{@glossary event}. Image dragging is suppressed by
+* default, so as not to interfere with touch interfaces.
 *
-* @event module:enyo/Input~Input#onDisabledChange
-* @type {Object}
-* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
-*	propagated the {@glossary event}.
-* @property {Object} event - An [object]{@glossary Object} containing event information.
-* @public
-*/
-
-/**
-* {@link module:enyo/Input~Input} implements an HTML [&lt;input&gt;]{@glossary input} element
-* with cross-platform support for change [events]{@glossary event}.
+* When [sizing]{@link module:enyo/Image~Image#sizing} is used, the control will not have a natural size and must be
+* manually sized using CSS `height` and `width`. Also, when [placeholder]{@link module:enyo/Image~Image#placeholder} is used
+* without `sizing`, you may wish to specify the size, as the image will not have a
+* natural size until the image loads, causing the placeholder to not be visible.
 *
-* You may listen for [oninput]{@link module:enyo/Input~Input#oninput} and
-* [onchange]{@link module:enyo/Input~Input#onchange} [DOM events]{@glossary DOMEvent} from
-* this [control]{@link module:enyo/Control~Control} to know when the text inside has been modified.
+* {@link module:enyo/Image~Image} also has support for multi-resolution images. If you are developing assets
+* for specific screen sizes, HD (720p), FHD (1080p), UHD (4k), for example, you may provide
+* specific image assets in a hash/object format to the `src` property, instead of the usual
+* string. The image sources will be used automatically when the screen resolution is less than
+* or equal to those screen types. For more informaton on our resolution support, and how to
+* enable this feature, see the documentation for {@link module:enyo/resolution}.
 *
-* For more information, see the documentation on
-* [Text Fields]{@linkplain $dev-guide/building-apps/controls/text-fields.html}
-* in the Enyo Developer Guide.
+* ```
+* // Take advantage of the multi-rez mode
+* var
+* 	kind = require('enyo/kind'),
+* 	Image = require('enyo/Image');
 *
-* @class Input
+* {kind: Image, src: {
+*	'hd': 'http://lorempixel.com/64/64/city/1/',
+*	'fhd': 'http://lorempixel.com/128/128/city/1/',
+*	'uhd': 'http://lorempixel.com/256/256/city/1/'
+* }, alt: 'Multi-rez'},
+*
+* // Standard string `src`
+* {kind: Image, src: 'http://lorempixel.com/128/128/city/1/', alt: 'Large'}
+* ```
+*
+* @class Image
 * @extends module:enyo/Control~Control
 * @ui
 * @public
 */
 module.exports = kind(
-	/** @lends module:enyo/Input~Input.prototype */ {
+	/** @lends module:enyo/Image~Image.prototype */ {
 
 	/**
 	* @private
 	*/
-	name: 'enyo.Input',
+	name: 'enyo.Image',
 
 	/**
 	* @private
@@ -17149,268 +17159,268 @@ module.exports = kind(
 	kind: Control,
 
 	/**
-	* @private
-	*/
-	published:
-		/** @lends module:enyo/Input~Input.prototype */ {
-
-		/**
-		* Value of the [input]{@link module:enyo/Input~Input}. Use this property only to initialize the
-		* value. Call `getValue()` and `setValue()` to manipulate the value at runtime.
-		*
-		* @type {String}
-		* @default ''
-		* @public
-		*/
-		value: '',
-
-		/**
-		* Text to display when the [input]{@link module:enyo/Input~Input} is empty
-		*
-		* @type {String}
-		* @default ''
-		* @public
-		*/
-		placeholder: '',
-
-		/**
-		* Type of [input]{@link module:enyo/Input~Input}; if not specified, it's treated as `'text'`.
-		* This may be anything specified for the `type` attribute in the HTML
-		* specification, including `'url'`, `'email'`, `'search'`, or `'number'`.
-		*
-		* @type {String}
-		* @default ''
-		* @public
-		*/
-		type: '',
-
-		/**
-		* When `true`, prevents input into the [control]{@link module:enyo/Control~Control}. This maps
-		* to the `disabled` DOM attribute.
-		*
-		* @type {Boolean}
-		* @default false
-		* @public
-		*/
-		disabled: false,
-
-		/**
-		* When `true`, the contents of the [input]{@link module:enyo/Input~Input} will be selected
-		* when the input gains focus.
-		*
-		* @type {Boolean}
-		* @default false
-		* @public
-		*/
-		selectOnFocus: false
-	},
-
-	/**
-	* @private
-	*/
-	events: {
-		onDisabledChange: ''
-	},
-
-	/**
-	* Set to `true` to focus this [control]{@link module:enyo/Control~Control} when it is rendered.
+	* When `true`, no [onload]{@link module:enyo/Image~Image#onload} or
+	* [onerror]{@link module:enyo/Image~Image#onerror} {@glossary event} handlers will be
+	* created.
 	*
 	* @type {Boolean}
 	* @default false
 	* @public
 	*/
-	defaultFocus: false,
+	noEvents: false,
 
 	/**
 	* @private
 	*/
-	tag: 'input',
+	published:
+		/** @lends module:enyo/Image~Image.prototype */ {
+
+		/**
+		* Maps to the `src` attribute of an [&lt;img&gt; tag]{@glossary img}. This also supports
+		* a multi-resolution hash object. For more details and examples, see the description of
+		* {@link module:enyo/Image~Image} above, or the documentation for {@link module:enyo/resolution}.
+		*
+		* @type {String|module:enyo/resolution#selectSrc~src}
+		* @default ''
+		* @public
+		*/
+		src: '',
+
+		/**
+		* Maps to the `alt` attribute of an [&lt;img&gt; tag]{@glossary img}.
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		alt: '',
+
+		/**
+		* By default, the [image]{@link module:enyo/Image~Image} is rendered using an `<img>` tag.
+		* When this property is set to `'cover'` or `'constrain'`, the image will be
+		* rendered using a `<div>`, utilizing `background-image` and `background-size`.
+		*
+		* Set this property to `'contain'` to letterbox the image in the available
+		* space, or `'cover'` to cover the available space with the image (cropping the
+		* larger dimension).  Note that when `sizing` is set, the control must be
+		* explicitly sized.
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		sizing: '',
+
+		/**
+		* When [sizing]{@link module:enyo/Image~Image#sizing} is used, this property sets the positioning of
+		* the [image]{@link module:enyo/Image~Image} within the bounds, corresponding to the
+		* [`background-position`]{@glossary backgroundPosition} CSS property.
+		*
+		* @type {String}
+		* @default 'center'
+		* @public
+		*/
+		position: 'center',
+
+		/**
+		* Provides a default image displayed while the URL specified by `src` is loaded or when that
+		* image fails to load.
+		*
+		* Note that the placeholder feature is not designed for use with images that contain transparent
+		* or semi-transparent pixels. Specifically, for performance reasons, the placeholder image is not
+		* removed when the image itself loads, but is simply covered by the image. This means that the
+		* placeholder will show through any transparent or semi-transparent pixels in the image.
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		placeholder: ''
+	},
 
 	/**
 	* @private
 	*/
-	classes: 'enyo-input',
+	tag: 'img',
+
+	/**
+	* @private
+	*/
+	classes: 'enyo-image',
+
+	/**
+	* `src` copied here to avoid overwriting the user-provided value when loading values
+	*
+	* @private
+	*/
+	_src: null,
+
+	/**
+	* @type {Object}
+	* @property {Boolean} draggable - This attribute will take one of the following
+	*	[String]{@glossary String} values: 'true', 'false' (the default), or 'auto'.
+	* Setting Boolean `false` will remove the attribute.
+	* @public
+	*/
+	attributes: {
+		draggable: 'false'
+	},
 
 	/**
 	* @private
 	*/
 	handlers: {
-		onfocus: 'focused',
-		oninput: 'input',
-		onclear: 'clear',
-		ondragstart: 'dragstart'
+		onerror: 'handleError'
 	},
+
+	/**
+	* @private
+	*/
+	observers: [
+		{method: 'updateSource', path: ['_src', 'placeholder']}
+	],
 
 	/**
 	* @method
 	* @private
 	*/
 	create: kind.inherit(function (sup) {
-		return function() {
-			if (platform.ie) {
-				this.handlers.onkeyup = 'iekeyup';
-			}
-			if (platform.windowsPhone) {
-				this.handlers.onkeydown = 'iekeydown';
+		return function () {
+			if (this.noEvents) {
+				delete this.attributes.onload;
+				delete this.attributes.onerror;
 			}
 			sup.apply(this, arguments);
-			this.placeholderChanged();
-			// prevent overriding a custom attribute with null
-			if (this.type) {
-				this.typeChanged();
-			}
+			this.altChanged();
+			this.sizingChanged();
+			this.srcChanged();
+			this.positionChanged();
 		};
 	}),
 
 	/**
-	* @method
+	* Cache the value of user-provided `src` value in `_src`
+	*
+	* @private
+	*/
+	srcChanged: function () {
+		this.set('_src', this.src);
+	},
+
+	/**
+	* @private
+	*/
+	altChanged: function () {
+		this.setAttribute('alt', this.alt);
+	},
+
+	/**
+	* @private
+	*/
+	sizingChanged: function (was) {
+		this.tag = this.sizing ? 'div' : 'img';
+		this.addRemoveClass('sized', !!this.sizing);
+		if (was) {
+			this.removeClass(was);
+		}
+		if (this.sizing) {
+			this.addClass(this.sizing);
+		}
+		this.updateSource();
+		if (this.generated) {
+			this.render();
+		}
+	},
+
+	/**
+	* @private
+	*/
+	positionChanged: function () {
+		if (this.sizing) {
+			this.applyStyle('background-position', this.position);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	handleError: function () {
+		if (this.placeholder) {
+			this.set('_src', null);
+		}
+	},
+
+	/**
+	* Updates the Image's src or background-image based on the values of _src and placeholder
+	*
+	* @private
+	*/
+	updateSource: function (was, is, prop) {
+		var src = ri.selectSrc(this._src),
+			srcUrl = src ? 'url(\'' + path.rewrite(src) + '\')' : null,
+			plUrl = this.placeholder ? 'url(\'' + path.rewrite(this.placeholder) + '\')' : null,
+			url;
+
+		if (this.sizing) {
+			// use either both urls, src, placeholder, or 'none', in that order
+			url = srcUrl && plUrl && (srcUrl + ',' + plUrl) || srcUrl || plUrl || 'none';
+			this.applyStyle('background-image', url);
+		} else {
+			// when update source
+			if (!prop || prop == 'placeholder') {
+				this.applyStyle('background-image', plUrl);
+			}
+			this.setAttribute('src', src);
+		}
+	},
+
+	/**
+	* @fires module:enyo/Image~Image#onload
+	* @fires module:enyo/Image~Image#onerror
 	* @private
 	*/
 	rendered: kind.inherit(function (sup) {
-		return function() {
+		return function () {
 			sup.apply(this, arguments);
-			dispatcher.makeBubble(this, 'focus', 'blur');
-			this.disabledChanged();
-			if (this.defaultFocus) {
-				this.focus();
-			}
+			dispatcher.makeBubble(this, 'load', 'error');
 		};
 	}),
 
 	/**
+	* @lends module:enyo/Image~Image
 	* @private
 	*/
-	typeChanged: function () {
-		this.setAttribute('type', this.type);
-	},
-
-	/**
-	* @private
-	*/
-	placeholderChanged: function () {
-		this.setAttribute('placeholder', this.placeholder);
-		this.valueChanged();
-	},
-
-	/**
-	* @fires module:enyo/Input~Input#onDisabledChange
-	* @private
-	*/
-	disabledChanged: function () {
-		this.setAttribute('disabled', this.disabled);
-		this.bubble('onDisabledChange');
-	},
-
-	/**
-	* @private
-	*/
-	valueChanged: function () {
-		var node = this.hasNode(),
-			attrs = this.attributes;
-		if (node) {
-			if (node.value !== this.value) {
-				node.value = this.value;
-			}
-			// we manually update the cached value so that the next time the
-			// attribute is requested or the control is re-rendered it will
-			// have the correct value - this is because calling setAttribute()
-			// in some cases does not receive an appropriate response from the
-			// browser
-			attrs.value = this.value;
-		} else {
-			this.setAttribute('value', this.value);
-		}
-		this.detectTextDirectionality((this.value || this.value === 0) ? this.value : this.get('placeholder'));
-	},
-
-	/**
-	* @private
-	*/
-	iekeyup: function (sender, e) {
-		var ie = platform.ie, kc = e.keyCode;
-		// input event fails to fire on backspace and delete keys in ie 9
-		if (ie == 9 && (kc == 8 || kc == 46)) {
-			this.bubble('oninput', e);
-		}
-	},
-
-	/**
-	* @private
-	*/
-	iekeydown: function (sender, e) {
-		var wp = platform.windowsPhone, kc = e.keyCode, dt = e.dispatchTarget;
-		// onchange event fails to fire on enter key for Windows Phone 8, so we force blur
-		if (wp <= 8 && kc == 13 && this.tag == 'input' && dt.hasNode()) {
-			dt.node.blur();
-		}
-	},
-
-	/**
-	* @private
-	*/
-	clear: function () {
-		this.setValue('');
-	},
-
-	// note: we disallow dragging of an input to allow text selection on all platforms
-	/**
-	* @private
-	*/
-	dragstart: function () {
-		return this.hasFocus();
-	},
-
-	/**
-	* @private
-	*/
-	focused: function () {
-		if (this.selectOnFocus) {
-			utils.asyncMethod(this, 'selectContents');
-		}
-	},
-
-	/**
-	* @private
-	*/
-	selectContents: function () {
-		var n = this.hasNode();
-
-		if (n && n.setSelectionRange) {
-			n.setSelectionRange(0, n.value.length);
-		} else if (n && n.createTextRange) {
-			var r = n.createTextRange();
-			r.expand('textedit');
-			r.select();
-		}
-	},
-
-	/**
-	* @private
-	*/
-	input: function () {
-		var val = this.getNodeProperty('value');
-		this.setValue(val);
+	statics: {
+		/**
+		* A globally accessible data URL that describes a simple
+		* placeholder image that may be used in samples and applications
+		* until final graphics are provided. As an SVG image, it will
+		* expand to fill the desired width and height set in the style.
+		*
+		* @type {String}
+		* @public
+		*/
+		placeholder:
+			'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC' +
+			'9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48cmVjdCB3aWR0aD0iMTAw' +
+			'JSIgaGVpZ2h0PSIxMDAlIiBzdHlsZT0ic3Ryb2tlOiAjNDQ0OyBzdHJva2Utd2lkdGg6IDE7IGZpbGw6ICNhYW' +
+			'E7IiAvPjxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjEwMCUiIHkyPSIxMDAlIiBzdHlsZT0ic3Ryb2tlOiAjNDQ0' +
+			'OyBzdHJva2Utd2lkdGg6IDE7IiAvPjxsaW5lIHgxPSIxMDAlIiB5MT0iMCIgeDI9IjAiIHkyPSIxMDAlIiBzdH' +
+			'lsZT0ic3Ryb2tlOiAjNDQ0OyBzdHJva2Utd2lkdGg6IDE7IiAvPjwvc3ZnPg=='
 	},
 
 	// Accessibility
 
 	/**
-	* @default textbox
+	* @default img
 	* @type {String}
 	* @see enyo/AccessibilitySupport~AccessibilitySupport#accessibilityRole
 	* @public
 	*/
-	accessibilityRole: 'textbox',
-
-	/**
-	* @private
-	*/
-	ariaObservers: [
-		{path: 'disabled', to: 'aria-disabled'}
-	]
+	accessibilityRole: 'img'
 });
 
-},{'../kind':'enyo/kind','../utils':'enyo/utils','../dispatcher':'enyo/dispatcher','../platform':'enyo/platform','../Control':'enyo/Control'}],'enyo/ScrollStrategy':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../resolution':'enyo/resolution','../dispatcher':'enyo/dispatcher','../pathResolver':'enyo/pathResolver','../Control':'enyo/Control'}],'enyo/ScrollStrategy':[function (module,exports,global,require,request){
 require('enyo');
 
 /**

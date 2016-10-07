@@ -122,9 +122,8 @@ module.exports = kind({
 	name: 'enyo.sample.PanelsFlickrSample',
 	kind: FittableRows,
 	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
-	style:'text-align:center',
 	components: [
-        	{kind:Image, src:'assets/logo_black.png', style:'margin-top:50%'},
+        	// {kind:Image, src:'assets/logo_black.png', style:'position: absolute;top: 50%;transform: translateY(-50%) translateX(-50%);left:50%'}
 	]
 });
 }],'src/login':[function (module,exports,global,require,request){
@@ -133,9 +132,10 @@ var
 
 var
 	kind = require('enyo/kind'),
-    Input = require('enyo/input'),
-    Image = require('enyo/image'),
-    Button = require('onyx/button');
+    Input = require('enyo/Input'),
+    Image = require('enyo/Image'),
+    Button = require('onyx/Button'),
+    Scroller = require('enyo/Scroller');
 
 var
 	FittableRows = require('layout/FittableRows');
@@ -150,42 +150,37 @@ module.exports = kind({
 	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit login-panel',
     style:'text-align:center',
 	components: [
-
-        {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
-        {classes:'demo-card-wide mdl-card mdl-shadow--2dp', components:[
-            {classes:'mdl-card__title', components:[
-                {tag:'h2', classes:'mdl-card__title-text', content:'Please Login'},
-            ]},
-            {classes:'mdl-card__supporting-text', content:'We didn\'t detect that you were logged in, please login to the use the application.'},
-            {tag:'div', style:'text-align: center;', components:[
-                {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
-                    {name:'username', id:'username', style:'color:black', classes:'mdl-textfield__input', kind: Input},
-                    {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'username'}, content:'Username'},
+        {kind: Scroller, fit:true, touch: true, components:[
+            // {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
+            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;', components:[
+                {classes:'mdl-card__title', components:[
+                    {tag:'h2', classes:'mdl-card__title-text', content:'Please Login'},
                 ]},
-                {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
-                    {name:'password', id:'password', style:'color:black', classes:'mdl-textfield__input', kind: Input},
-                    {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'password'}, content:'Password'},
+                {classes:'mdl-card__supporting-text', content:'We didn\'t detect that you were logged in, please login to the use the application.'},
+                {tag:'div', style:'text-align: center;', components:[
+                    {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
+                        {name:'username', id:'username', style:'color:black', classes:'mdl-textfield__input', kind: Input},
+                        {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'username'}, content:'Username'},
+                    ]},
+                    {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
+                        {name:'password', id:'password', style:'color:black', classes:'mdl-textfield__input', kind: Input},
+                        {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'password'}, content:'Password'},
+                    ]}
+                ]},
+                {classes:'mdl-card__actions mdl-card--border', components:[
+                    {tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick: 'login', content:'Login'},
+                    {tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick:'newaccount', content:'Create Account'}
                 ]}
-            ]},
-            {classes:'mdl-card__actions mdl-card--border', components:[
-                {tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick: 'login', content:'Login'},
-                {tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick:'newaccount', content:'Create Account'}
             ]}
-
-            // {classes:'mdl-card__menu', components:[
-            //     {tag:'button', classes:'mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect', components:[
-            //         {tag:'i', classes:'material-icons', content:'Login'}
-            //     ]}
-            // ]}
-
         ]}
 	],
     login: function() {
-        Parse.User.logIn(this.$.username.value, this.$.password.value, {
+
+        Parse.User.logIn(document.querySelector('#username').value, document.querySelector('#password').value, {
             success: function(user) {
                 this.doLoggedIn();
-                this.$.username.set('value', '');
-                this.$.password.set('value', '');
+                document.querySelector('#username').value = '';
+                document.querySelector('#password').value = '';
             }.bind(this),
             error: function(user, error) {
                 alert('fail whale');
@@ -202,8 +197,10 @@ var
 
 var
 	kind = require('enyo/kind'),
-    Input = require('onyx/input'),
-    Button = require('onyx/button');
+    Input = require('onyx/Input'),
+    Image = require('enyo/Image'),
+    Button = require('onyx/Button'),
+    Scroller = require('enyo/Scroller');
 
 var
 	FittableRows = require('layout/FittableRows');
@@ -211,23 +208,122 @@ var
 module.exports = kind({
 	name: 'com.dp.syl.signup',
 	kind: FittableRows,
-	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
+	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit signup-panel',
+    events: {
+        'onLoggedIn':''
+    },
+    style:'text-align:center',
 	components: [
-        {content:'signup for app'},
-        {name:'username', kind: Input, placeholder:'username'},
-        {name:'password', kind: Input, placeholder:'password'},
-        {name:'loginbutton', kind: Button, onclick: 'signup', content: 'Signup'}
+         {kind: Scroller, fit:true, touch: true, components:[
+            // {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
+            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;', components:[
+                {classes:'mdl-card__title', components:[
+                    {tag:'h2', classes:'mdl-card__title-text', content:'Signup'},
+                ]},
+                {classes:'mdl-card__supporting-text', content:'We need this minimal information, so we can store your preferences. We will no ask for or share any information.'},
+                {tag:'div', style:'text-align: center;', components:[
+                    {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
+                        {name:'username', id:'signup_username', style:'color:black', classes:'mdl-textfield__input', kind: Input},
+                        {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'username'}, content:'Username'},
+                    ]},
+                    {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
+                        {name:'password', id:'signup_password', style:'color:black', classes:'mdl-textfield__input', kind: Input},
+                        {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'password'}, content:'Password'},
+                    ]}
+                ]},
+                {classes:'mdl-card__actions mdl-card--border', components:[
+                    {tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick: 'signup', content:'Signup'},
+                ]}
+            ]}
+        ]}
 	],
     signup: function() {
-        Parse.User.signUp(this.$.username.value, this.$.password.value,  { ACL: new Parse.ACL() }, {
+
+        var username = document.querySelector('#signup_username').value;
+        var password = document.querySelector('#signup_password').value;
+
+        Parse.User.signUp(username, password,  { ACL: new Parse.ACL() }, {
             success: function(user) {
-                alert('account created & logged in');
-            },
+                document.querySelector('#signup_username').value = '';
+                document.querySelector('#signup_password').value = '';
+                this.doLoggedIn();
+            }.bind(this),
             error: function(user, error) {
                 alert('fail whale');
-            }
+            }.bind(this)
         });
     }
+});
+},{'../../lib/parse.min.js':'lib/parse.min'}],'src/chrome':[function (module,exports,global,require,request){
+var Parse = require('../../lib/parse.min.js');
+
+var
+	kind = require('enyo/kind'),
+	json = require('enyo/json');
+
+var
+	Button = require('onyx/button'),
+	CollapsingArranger = require('layout/CollapsingArranger'),
+	FittableColumns = require('layout/FittableColumns'),
+	FittableRows = require('layout/FittableRows'),
+	List = require('layout/List'),
+	Panels = require('layout/Panels'),
+	Ajax = require('enyo/Ajax'),
+	Scroller = require('enyo/Scroller');
+
+module.exports = kind({
+	name: 'com.dp.syl.chrome',
+	events: {
+		'onLogout':''
+	},
+	kind: Panels,
+	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
+	arrangerKind: CollapsingArranger,
+	components: [
+		
+			{kind: FittableRows, classes: 'enyo-fit', components: [
+				{kind: Button, onclick: 'logout', content: 'Logout'}
+			]},
+			{name: 'pictureView', fit: true, kind: FittableRows, classes: 'enyo-fit panels-sample-flickr-main', components: [
+				{classes:'mdl-layout mdl-js-layout mdl-layout--fixed-header', components:[
+					{tag:'header', classes:'mdl-layout__header', components:[
+						{classes:'mdl-layout__header-row', components:[
+							{tag:'span', classes:'mdl-layout-title', content:'Syllabus Manager'},
+						]}
+					]}
+				]},
+				{classes:'mdl-layout__drawer-button', attributes:{"role":"button"}, components:[
+					{tag:'i', classes:'material-icons', content:'menu'}
+				]},
+				{kind:Scroller, tag:'main', fit: true, style:'margin-top:45px;padding-top:25px;', components:[
+						// {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
+						{classes:'chrome-card-wide mdl-card mdl-shadow--2dp', components:[
+							{classes:'mdl-card__title', components:[
+								{tag:'h2', classes:'mdl-card__title-text', content:'Welcome!'},
+							]},
+							{classes:'mdl-card__supporting-text', content:'Looks like this is your first time here, you are not following any instructors.'},
+							{tag:'div', style:'text-align: center;', components:[
+								
+							]},
+							{classes:'mdl-card__actions mdl-card--border', components:[
+								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  content:'Dismiss'},
+								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick:'newaccount', content:'Find an Instructor'}
+							]}
+						]}
+				]}	
+			]}
+	],
+	logout: function(){
+		Parse.User.logOut().then(function(){
+			this.doLogout();
+		}.bind(this));
+	},
+	rendered: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			this.next();
+		};
+	})
 });
 },{'../../lib/parse.min.js':'lib/parse.min'}],'src/schools':[function (module,exports,global,require,request){
 var
@@ -282,51 +378,7 @@ module.exports = kind({
 		this.doSchoolSelected(item);
 	},
 });
-}],'src/chrome':[function (module,exports,global,require,request){
-var Parse = require('../../lib/parse.min.js');
-
-var
-	kind = require('enyo/kind'),
-	json = require('enyo/json');
-
-var
-	Button = require('onyx/button'),
-	CollapsingArranger = require('layout/CollapsingArranger'),
-	FittableColumns = require('layout/FittableColumns'),
-	FittableRows = require('layout/FittableRows'),
-	List = require('layout/List'),
-	Panels = require('layout/Panels'),
-	Ajax = require('enyo/Ajax');
-
-module.exports = kind({
-	name: 'com.dp.syl.chrome',
-	events: {
-		'onLogout':''
-	},
-	kind: Panels,
-	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
-	arrangerKind: CollapsingArranger,
-	components: [
-		{kind: FittableRows, classes: 'enyo-fit', components: [
-			{kind: Button, onclick: 'logout', content: 'Logout'}
-		]},
-		{name: 'pictureView', fit: true, kind: FittableRows, classes: 'enyo-fit panels-sample-flickr-main', components: [
-			
-		]}
-	],
-	logout: function(){
-		Parse.User.logOut().then(function(){
-			this.doLogout();
-		}.bind(this));
-	},
-	rendered: kind.inherit(function (sup) {
-		return function() {
-			sup.apply(this, arguments);
-			this.next();
-		};
-	})
-});
-},{'../../lib/parse.min.js':'lib/parse.min'}],'index':[function (module,exports,global,require,request){
+}],'index':[function (module,exports,global,require,request){
 // This is the default "main" file, specified from the root package.json file
 // The ready function is excuted when the DOM is ready for usage.
 
@@ -368,7 +420,10 @@ ready(function() {
 			},
 			{
 				name:'signup', 
-				kind: signup
+				kind: signup,
+				events: {
+					'onLoggedIn': 'handleLoggedIn'
+				}
 			},
 			{
 				name:'chrome',
@@ -428,6 +483,8 @@ ready(function() {
 			this.$.chrome.render();
 			this.$.chrome.show();
 			this.$.splash.hide();
+			this.$.login.hide();
+			this.$.signup.hide();
 		}
 	});
 	var App = new app();
