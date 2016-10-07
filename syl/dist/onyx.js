@@ -148,7 +148,7 @@ module.exports = kind(
 	classes: 'onyx-input'
 });
 
-}],'onyx/button':[function (module,exports,global,require,request){
+}],'onyx/Button':[function (module,exports,global,require,request){
 require('onyx');
 
 /**
@@ -272,7 +272,7 @@ module.exports = kind(
 	}
 });
 
-}],'onyx/Button':[function (module,exports,global,require,request){
+}],'onyx/button':[function (module,exports,global,require,request){
 require('onyx');
 
 /**

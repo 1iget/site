@@ -67,11 +67,6 @@ body {
 .panels-sample-flickr-image.tall {
   height: 100%;
 }
-.chrome-card-wide {
-  width: 90% !important;
-  margin-left: auto;
-  margin-right: auto;
-}
 
 body {
   font-family: 'Open Sans', sans-serif;
@@ -129,6 +124,11 @@ body {
 }
 .panels-sample-flickr-image.tall {
   height: 100%;
+}
+.chrome-card-wide {
+  width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /**
@@ -6643,7 +6643,7 @@ iframe.heightSet {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: local('Material Icons'), local('MaterialIcons-Regular'), url(https://fonts.gstatic.com/s/materialicons/v18/2fcrYFNaTjcS6g4U3t-Y5UEw0lE80llgEseQY3FEmqw.woff2) format('woff2');
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url('assets/mdl_icons.woff2') format('woff2');
 }
 .material-icons {
   font-family: 'Material Icons';

@@ -254,77 +254,6 @@ module.exports = kind({
         });
     }
 });
-},{'../../lib/parse.min.js':'lib/parse.min'}],'src/chrome':[function (module,exports,global,require,request){
-var Parse = require('../../lib/parse.min.js');
-
-var
-	kind = require('enyo/kind'),
-	json = require('enyo/json');
-
-var
-	Button = require('onyx/button'),
-	CollapsingArranger = require('layout/CollapsingArranger'),
-	FittableColumns = require('layout/FittableColumns'),
-	FittableRows = require('layout/FittableRows'),
-	List = require('layout/List'),
-	Panels = require('layout/Panels'),
-	Ajax = require('enyo/Ajax'),
-	Scroller = require('enyo/Scroller');
-
-module.exports = kind({
-	name: 'com.dp.syl.chrome',
-	events: {
-		'onLogout':''
-	},
-	kind: Panels,
-	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
-	arrangerKind: CollapsingArranger,
-	components: [
-		
-			{kind: FittableRows, classes: 'enyo-fit', components: [
-				{kind: Button, onclick: 'logout', content: 'Logout'}
-			]},
-			{name: 'pictureView', fit: true, kind: FittableRows, classes: 'enyo-fit panels-sample-flickr-main', components: [
-				{classes:'mdl-layout mdl-js-layout mdl-layout--fixed-header', components:[
-					{tag:'header', classes:'mdl-layout__header', components:[
-						{classes:'mdl-layout__header-row', components:[
-							{tag:'span', classes:'mdl-layout-title', content:'Syllabus Manager'},
-						]}
-					]}
-				]},
-				{classes:'mdl-layout__drawer-button', attributes:{"role":"button"}, components:[
-					{tag:'i', classes:'material-icons', content:'menu'}
-				]},
-				{kind:Scroller, tag:'main', fit: true, style:'margin-top:45px;padding-top:25px;', components:[
-						// {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
-						{classes:'chrome-card-wide mdl-card mdl-shadow--2dp', components:[
-							{classes:'mdl-card__title', components:[
-								{tag:'h2', classes:'mdl-card__title-text', content:'Welcome!'},
-							]},
-							{classes:'mdl-card__supporting-text', content:'Looks like this is your first time here, you are not following any instructors.'},
-							{tag:'div', style:'text-align: center;', components:[
-								
-							]},
-							{classes:'mdl-card__actions mdl-card--border', components:[
-								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  content:'Dismiss'},
-								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick:'newaccount', content:'Find an Instructor'}
-							]}
-						]}
-				]}	
-			]}
-	],
-	logout: function(){
-		Parse.User.logOut().then(function(){
-			this.doLogout();
-		}.bind(this));
-	},
-	rendered: kind.inherit(function (sup) {
-		return function() {
-			sup.apply(this, arguments);
-			this.next();
-		};
-	})
-});
 },{'../../lib/parse.min.js':'lib/parse.min'}],'src/schools':[function (module,exports,global,require,request){
 var
 	kind = require('enyo/kind'),
@@ -378,7 +307,80 @@ module.exports = kind({
 		this.doSchoolSelected(item);
 	},
 });
-}],'index':[function (module,exports,global,require,request){
+}],'src/chrome':[function (module,exports,global,require,request){
+var Parse = require('../../lib/parse.min.js');
+
+var
+	kind = require('enyo/kind'),
+	json = require('enyo/json');
+
+var
+	Button = require('onyx/button'),
+	CollapsingArranger = require('layout/CollapsingArranger'),
+	FittableColumns = require('layout/FittableColumns'),
+	FittableRows = require('layout/FittableRows'),
+	List = require('layout/List'),
+	Panels = require('layout/Panels'),
+	Ajax = require('enyo/Ajax'),
+	Scroller = require('enyo/Scroller');
+
+module.exports = kind({
+	name: 'com.dp.syl.chrome',
+	events: {
+		'onLogout':''
+	},
+	kind: Panels,
+	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
+	arrangerKind: CollapsingArranger,
+	components: [
+			{kind: FittableRows, classes: 'enyo-fit', components: [
+				{kind: Button, onclick: 'logout', content: 'Logout'}
+			]},
+			{name: 'pictureView', fit: true, kind: FittableRows, classes: 'enyo-fit panels-sample-flickr-main', components: [
+				{classes:'mdl-layout mdl-js-layout mdl-layout--fixed-header', components:[
+					{tag:'header', classes:'mdl-layout__header', components:[
+						{classes:'mdl-layout__header-row', components:[
+							{tag:'span', classes:'mdl-layout-title', content:'Syllabus Manager'},
+						]}
+					]}
+				]},
+				{classes:'mdl-layout__drawer-button', attributes:{role:'button'}, ontap:'handleToggleDrawer', components:[
+					{tag:'i', classes:'material-icons', content:'menu'}
+				]},
+				{kind:Scroller, tag:'main', fit: true, style:'margin-top:45px;padding-top:25px;', components:[
+						// {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
+						{classes:'chrome-card-wide mdl-card mdl-shadow--2dp', components:[
+							{classes:'mdl-card__title', components:[
+								{tag:'h2', classes:'mdl-card__title-text', content:'Welcome!'},
+							]},
+							{classes:'mdl-card__supporting-text', content:'Looks like this is your first time here, you are not following any instructors.'},
+							{tag:'div', style:'text-align: center;', components:[
+								
+							]},
+							{classes:'mdl-card__actions mdl-card--border', components:[
+								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  content:'Dismiss'},
+								{tag:'a', classes:'mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect',  onclick:'newaccount', content:'Find an Instructor'}
+							]}
+						]}
+				]}	
+			]}
+	],
+	handleToggleDrawer() {
+		this.previous();
+	},
+	logout: function(){
+		Parse.User.logOut().then(function(){
+			this.doLogout();
+		}.bind(this));
+	},
+	rendered: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			this.next();
+		};
+	})
+});
+},{'../../lib/parse.min.js':'lib/parse.min'}],'index':[function (module,exports,global,require,request){
 // This is the default "main" file, specified from the root package.json file
 // The ready function is excuted when the DOM is ready for usage.
 
@@ -429,7 +431,8 @@ ready(function() {
 				name:'chrome',
 				kind: chrome,
 				events: {
-					onLogout: 'handleLogout'
+					onLogout: 'handleLogout',
+					onToggleDrawer: 'handleToggleDrawer'
 				}
 			}
 		],
