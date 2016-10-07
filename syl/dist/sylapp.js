@@ -113,7 +113,8 @@ this.setActionHidden_(!1)),this.textElement_.textContent=this.message_,this.elem
 
 }],'src/splash':[function (module,exports,global,require,request){
 var
-	kind = require('enyo/kind');
+	kind = require('enyo/kind'),
+	Image = require('enyo/image');
 
 var
 	FittableRows = require('layout/FittableRows');
@@ -121,8 +122,9 @@ module.exports = kind({
 	name: 'enyo.sample.PanelsFlickrSample',
 	kind: FittableRows,
 	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit',
+	style:'text-align:center',
 	components: [
-        {fit: true, content:'Syllabus App Splash Screen'}
+        	{kind:Image, src:'assets/logo_black.png', style:'margin-top:50%'},
 	]
 });
 }],'src/login':[function (module,exports,global,require,request){
@@ -132,6 +134,7 @@ var
 var
 	kind = require('enyo/kind'),
     Input = require('enyo/input'),
+    Image = require('enyo/image'),
     Button = require('onyx/button');
 
 var
@@ -145,9 +148,10 @@ module.exports = kind({
         onLoggedIn: ''
     },
 	classes: 'panels-sample-flickr-panels enyo-unselectable enyo-fit login-panel',
+    style:'text-align:center',
 	components: [
 
-
+        {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
         {classes:'demo-card-wide mdl-card mdl-shadow--2dp', components:[
             {classes:'mdl-card__title', components:[
                 {tag:'h2', classes:'mdl-card__title-text', content:'Please Login'},
