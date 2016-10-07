@@ -5,6 +5,9 @@
 .login-panel {
   background-color: #CCE2CD !important;
 }
+.mdl-textfield {
+  width: 80% !important;
+}
 
 .signup-panel {
   background-color: #CCE2CD !important;
@@ -73,7 +76,7 @@ body {
 }
 .panels-sample-flickr-panels {
   color: #fff;
-  background-color: #ACB19A;
+  background-color: #555;
 }
 .panels-sample-flickr-item {
   position: relative;

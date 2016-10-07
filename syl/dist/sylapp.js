@@ -152,7 +152,7 @@ module.exports = kind({
 	components: [
         {kind: Scroller, fit:true, touch: true, components:[
             // {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
-            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;', components:[
+            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;width:90%;', components:[
                 {classes:'mdl-card__title', components:[
                     {tag:'h2', classes:'mdl-card__title-text', content:'Please Login'},
                 ]},
@@ -163,7 +163,7 @@ module.exports = kind({
                         {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'username'}, content:'Username'},
                     ]},
                     {classes:'mdl-textfield mdl-js-textfield mdl-textfield--floating-label', components:[
-                        {name:'password', id:'password', style:'color:black', classes:'mdl-textfield__input', kind: Input},
+                        {name:'password', id:'password', style:'color:black', classes:'mdl-textfield__input', kind: Input, type:'password'},
                         {classes:'mdl-textfield__label', tag: 'label', attributes:{for:'password'}, content:'Password'},
                     ]}
                 ]},
