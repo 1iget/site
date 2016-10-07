@@ -16033,7 +16033,349 @@ Dom.requiresWindow(function() {
 	touchGesture.connect();
 });
 
-},{'./utils':'enyo/utils','./gesture':'enyo/gesture','./dispatcher':'enyo/dispatcher','./platform':'enyo/platform','./dom':'enyo/dom','./job':'enyo/job'}],'enyo/Input':[function (module,exports,global,require,request){
+},{'./utils':'enyo/utils','./gesture':'enyo/gesture','./dispatcher':'enyo/dispatcher','./platform':'enyo/platform','./dom':'enyo/dom','./job':'enyo/job'}],'enyo/input':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Input~Input} kind.
+* @module enyo/Input
+*/
+
+var
+	kind = require('../kind'),
+	utils = require('../utils'),
+	dispatcher = require('../dispatcher'),
+	platform = require('../platform');
+var
+	Control = require('../Control');
+
+/**
+* Fires immediately when the text changes.
+*
+* @event module:enyo/Input~Input#oninput
+* @type {Object}
+* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
+*	propagated the {@glossary event}.
+* @property {Object} event - An [object]{@glossary Object} containing event information.
+* @public
+*/
+
+/**
+* Fires when the text has changed and the [input]{@link module:enyo/Input~Input} subsequently loses
+* focus.
+*
+* @event module:enyo/Input~Input#onchange
+* @type {Object}
+* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
+*	propagated the {@glossary event}.
+* @property {Object} event - An [object]{@glossary Object} containing event information.
+* @public
+*/
+
+/**
+* Fires when the [input]{@link module:enyo/Input~Input} is disabled or enabled.
+*
+* @event module:enyo/Input~Input#onDisabledChange
+* @type {Object}
+* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
+*	propagated the {@glossary event}.
+* @property {Object} event - An [object]{@glossary Object} containing event information.
+* @public
+*/
+
+/**
+* {@link module:enyo/Input~Input} implements an HTML [&lt;input&gt;]{@glossary input} element
+* with cross-platform support for change [events]{@glossary event}.
+*
+* You may listen for [oninput]{@link module:enyo/Input~Input#oninput} and
+* [onchange]{@link module:enyo/Input~Input#onchange} [DOM events]{@glossary DOMEvent} from
+* this [control]{@link module:enyo/Control~Control} to know when the text inside has been modified.
+*
+* For more information, see the documentation on
+* [Text Fields]{@linkplain $dev-guide/building-apps/controls/text-fields.html}
+* in the Enyo Developer Guide.
+*
+* @class Input
+* @extends module:enyo/Control~Control
+* @ui
+* @public
+*/
+module.exports = kind(
+	/** @lends module:enyo/Input~Input.prototype */ {
+
+	/**
+	* @private
+	*/
+	name: 'enyo.Input',
+
+	/**
+	* @private
+	*/
+	kind: Control,
+
+	/**
+	* @private
+	*/
+	published:
+		/** @lends module:enyo/Input~Input.prototype */ {
+
+		/**
+		* Value of the [input]{@link module:enyo/Input~Input}. Use this property only to initialize the
+		* value. Call `getValue()` and `setValue()` to manipulate the value at runtime.
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		value: '',
+
+		/**
+		* Text to display when the [input]{@link module:enyo/Input~Input} is empty
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		placeholder: '',
+
+		/**
+		* Type of [input]{@link module:enyo/Input~Input}; if not specified, it's treated as `'text'`.
+		* This may be anything specified for the `type` attribute in the HTML
+		* specification, including `'url'`, `'email'`, `'search'`, or `'number'`.
+		*
+		* @type {String}
+		* @default ''
+		* @public
+		*/
+		type: '',
+
+		/**
+		* When `true`, prevents input into the [control]{@link module:enyo/Control~Control}. This maps
+		* to the `disabled` DOM attribute.
+		*
+		* @type {Boolean}
+		* @default false
+		* @public
+		*/
+		disabled: false,
+
+		/**
+		* When `true`, the contents of the [input]{@link module:enyo/Input~Input} will be selected
+		* when the input gains focus.
+		*
+		* @type {Boolean}
+		* @default false
+		* @public
+		*/
+		selectOnFocus: false
+	},
+
+	/**
+	* @private
+	*/
+	events: {
+		onDisabledChange: ''
+	},
+
+	/**
+	* Set to `true` to focus this [control]{@link module:enyo/Control~Control} when it is rendered.
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
+	*/
+	defaultFocus: false,
+
+	/**
+	* @private
+	*/
+	tag: 'input',
+
+	/**
+	* @private
+	*/
+	classes: 'enyo-input',
+
+	/**
+	* @private
+	*/
+	handlers: {
+		onfocus: 'focused',
+		oninput: 'input',
+		onclear: 'clear',
+		ondragstart: 'dragstart'
+	},
+
+	/**
+	* @method
+	* @private
+	*/
+	create: kind.inherit(function (sup) {
+		return function() {
+			if (platform.ie) {
+				this.handlers.onkeyup = 'iekeyup';
+			}
+			if (platform.windowsPhone) {
+				this.handlers.onkeydown = 'iekeydown';
+			}
+			sup.apply(this, arguments);
+			this.placeholderChanged();
+			// prevent overriding a custom attribute with null
+			if (this.type) {
+				this.typeChanged();
+			}
+		};
+	}),
+
+	/**
+	* @method
+	* @private
+	*/
+	rendered: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			dispatcher.makeBubble(this, 'focus', 'blur');
+			this.disabledChanged();
+			if (this.defaultFocus) {
+				this.focus();
+			}
+		};
+	}),
+
+	/**
+	* @private
+	*/
+	typeChanged: function () {
+		this.setAttribute('type', this.type);
+	},
+
+	/**
+	* @private
+	*/
+	placeholderChanged: function () {
+		this.setAttribute('placeholder', this.placeholder);
+		this.valueChanged();
+	},
+
+	/**
+	* @fires module:enyo/Input~Input#onDisabledChange
+	* @private
+	*/
+	disabledChanged: function () {
+		this.setAttribute('disabled', this.disabled);
+		this.bubble('onDisabledChange');
+	},
+
+	/**
+	* @private
+	*/
+	valueChanged: function () {
+		var node = this.hasNode(),
+			attrs = this.attributes;
+		if (node) {
+			if (node.value !== this.value) {
+				node.value = this.value;
+			}
+			// we manually update the cached value so that the next time the
+			// attribute is requested or the control is re-rendered it will
+			// have the correct value - this is because calling setAttribute()
+			// in some cases does not receive an appropriate response from the
+			// browser
+			attrs.value = this.value;
+		} else {
+			this.setAttribute('value', this.value);
+		}
+		this.detectTextDirectionality((this.value || this.value === 0) ? this.value : this.get('placeholder'));
+	},
+
+	/**
+	* @private
+	*/
+	iekeyup: function (sender, e) {
+		var ie = platform.ie, kc = e.keyCode;
+		// input event fails to fire on backspace and delete keys in ie 9
+		if (ie == 9 && (kc == 8 || kc == 46)) {
+			this.bubble('oninput', e);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	iekeydown: function (sender, e) {
+		var wp = platform.windowsPhone, kc = e.keyCode, dt = e.dispatchTarget;
+		// onchange event fails to fire on enter key for Windows Phone 8, so we force blur
+		if (wp <= 8 && kc == 13 && this.tag == 'input' && dt.hasNode()) {
+			dt.node.blur();
+		}
+	},
+
+	/**
+	* @private
+	*/
+	clear: function () {
+		this.setValue('');
+	},
+
+	// note: we disallow dragging of an input to allow text selection on all platforms
+	/**
+	* @private
+	*/
+	dragstart: function () {
+		return this.hasFocus();
+	},
+
+	/**
+	* @private
+	*/
+	focused: function () {
+		if (this.selectOnFocus) {
+			utils.asyncMethod(this, 'selectContents');
+		}
+	},
+
+	/**
+	* @private
+	*/
+	selectContents: function () {
+		var n = this.hasNode();
+
+		if (n && n.setSelectionRange) {
+			n.setSelectionRange(0, n.value.length);
+		} else if (n && n.createTextRange) {
+			var r = n.createTextRange();
+			r.expand('textedit');
+			r.select();
+		}
+	},
+
+	/**
+	* @private
+	*/
+	input: function () {
+		var val = this.getNodeProperty('value');
+		this.setValue(val);
+	},
+
+	// Accessibility
+
+	/**
+	* @default textbox
+	* @type {String}
+	* @see enyo/AccessibilitySupport~AccessibilitySupport#accessibilityRole
+	* @public
+	*/
+	accessibilityRole: 'textbox',
+
+	/**
+	* @private
+	*/
+	ariaObservers: [
+		{path: 'disabled', to: 'aria-disabled'}
+	]
+});
+
+},{'../kind':'enyo/kind','../utils':'enyo/utils','../dispatcher':'enyo/dispatcher','../platform':'enyo/platform','../Control':'enyo/Control'}],'enyo/Input':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -16810,99 +17152,7 @@ module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./dispatcher':'enyo/dispatcher','./Control':'enyo/Control'}],'enyo/GroupItem':[function (module,exports,global,require,request){
-require('enyo');
-
-/**
-* Contains the declaration for the {@link module:enyo/GroupItem~GroupItem} kind.
-* @module enyo/GroupItem
-*/
-
-var
-	kind = require('./kind');
-var
-	Control = require('./Control');
-
-/**
-* Fires when the [active state]{@link module:enyo/GroupItem~GroupItem#active} has changed.
-*
-* @event module:enyo/GroupItem~GroupItem#onActivate
-* @type {Object}
-* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
-*	propagated the {@glossary event}.
-* @property {Object} event - An [object]{@glossary Object} containing event information.
-* @public
-*/
-
-/**
-* {@link module:enyo/GroupItem~GroupItem} is the base [kind]{@glossary kind} for the
-* [Grouping]{@link module:enyo/Group~Group} API. It manages the
-* [active state]{@link module:enyo/GroupItem~GroupItem#active} of the [component]{@link module:enyo/Component~Component}
-* (or the [inheriting]{@glossary subkind} component). A subkind may call `setActive()` 
-* to set the [active]{@link module:enyo/GroupItem~GroupItem#active} property to the desired state; this
-* will additionally [bubble]{@link module:enyo/Component~Component#bubble} an 
-* [onActivate]{@link module:enyo/GroupItem~GroupItem#onActivate} {@glossary event}, which may
-* be handled as needed by the containing components. This is useful for creating
-* groups of items whose state should be managed collectively.
-*
-* For an example of how this works, see the {@link module:enyo/Group~Group} kind, which enables the
-* creation of radio groups from arbitrary components that	support the Grouping API.
-*
-* @class GroupItem
-* @extends module:enyo/Control~Control
-* @ui
-* @public
-*/
-module.exports = kind(
-	/** @lends module:enyo/Groupitem~Groupitem.prototype */ {
-
-	/**
-	* @private
-	*/
-	name: 'enyo.GroupItem',
-
-	/**
-	* @private
-	*/
-	kind: Control,
-
-	/**
-	* @private
-	*/
-	published: 
-		/** @lends module:enyo/Groupitem~Groupitem.prototype */ {
-
-		/**
-		* Will be `true` if the item is currently selected.
-		* 
-		* @type {Boolean}
-		* @default false
-		* @public
-		*/
-		active: false
-	},
-	
-	/**
-	* @method
-	* @private
-	*/
-	rendered: kind.inherit(function (sup) {
-		return function() {
-			sup.apply(this, arguments);
-			this.activeChanged();
-		};
-	}),
-
-	/**
-	* @fires module:enyo/GroupItem~GroupItem#onActivate
-	* @private
-	*/
-	activeChanged: function () {
-		this.bubble('onActivate');
-	}
-});
-
-},{'./kind':'enyo/kind','./Control':'enyo/Control'}],'enyo/ScrollThumb':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./dispatcher':'enyo/dispatcher','./Control':'enyo/Control'}],'enyo/ScrollThumb':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -17098,50 +17348,99 @@ module.exports = kind(
 	}
 });
 
-},{'../kind':'enyo/kind','../Control':'enyo/Control','../dom':'enyo/dom'}],'enyo/ToolDecorator':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../Control':'enyo/Control','../dom':'enyo/dom'}],'enyo/GroupItem':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
-* Contains the declaration for the {@link module:enyo/ToolDecorator~ToolDecorator} kind.
-* @module enyo/ToolDecorator
+* Contains the declaration for the {@link module:enyo/GroupItem~GroupItem} kind.
+* @module enyo/GroupItem
 */
 
-
-
 var
-	kind = require('../kind');
+	kind = require('./kind');
 var
-	GroupItem = require('../GroupItem');
+	Control = require('./Control');
 
 /**
-* {@link module:enyo/ToolDecorator~ToolDecorator} lines up [components]{@link module:enyo/Component~Component} in a row,
-* centered vertically.
+* Fires when the [active state]{@link module:enyo/GroupItem~GroupItem#active} has changed.
 *
-* @class ToolDecorator
-* @extends module:enyo/GroupItem~GroupItem
+* @event module:enyo/GroupItem~GroupItem#onActivate
+* @type {Object}
+* @property {Object} sender - The [component]{@link module:enyo/Component~Component} that most recently
+*	propagated the {@glossary event}.
+* @property {Object} event - An [object]{@glossary Object} containing event information.
+* @public
+*/
+
+/**
+* {@link module:enyo/GroupItem~GroupItem} is the base [kind]{@glossary kind} for the
+* [Grouping]{@link module:enyo/Group~Group} API. It manages the
+* [active state]{@link module:enyo/GroupItem~GroupItem#active} of the [component]{@link module:enyo/Component~Component}
+* (or the [inheriting]{@glossary subkind} component). A subkind may call `setActive()` 
+* to set the [active]{@link module:enyo/GroupItem~GroupItem#active} property to the desired state; this
+* will additionally [bubble]{@link module:enyo/Component~Component#bubble} an 
+* [onActivate]{@link module:enyo/GroupItem~GroupItem#onActivate} {@glossary event}, which may
+* be handled as needed by the containing components. This is useful for creating
+* groups of items whose state should be managed collectively.
+*
+* For an example of how this works, see the {@link module:enyo/Group~Group} kind, which enables the
+* creation of radio groups from arbitrary components that	support the Grouping API.
+*
+* @class GroupItem
+* @extends module:enyo/Control~Control
 * @ui
 * @public
 */
 module.exports = kind(
-	/** @lends module:enyo/ToolDecorator~ToolDecorator.prototype */ {
+	/** @lends module:enyo/Groupitem~Groupitem.prototype */ {
 
 	/**
 	* @private
 	*/
-	name: 'enyo.ToolDecorator',
+	name: 'enyo.GroupItem',
 
 	/**
 	* @private
 	*/
-	kind: GroupItem,
+	kind: Control,
 
 	/**
 	* @private
 	*/
-	classes: 'enyo-tool-decorator'
+	published: 
+		/** @lends module:enyo/Groupitem~Groupitem.prototype */ {
+
+		/**
+		* Will be `true` if the item is currently selected.
+		* 
+		* @type {Boolean}
+		* @default false
+		* @public
+		*/
+		active: false
+	},
+	
+	/**
+	* @method
+	* @private
+	*/
+	rendered: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			this.activeChanged();
+		};
+	}),
+
+	/**
+	* @fires module:enyo/GroupItem~GroupItem#onActivate
+	* @private
+	*/
+	activeChanged: function () {
+		this.bubble('onActivate');
+	}
 });
 
-},{'../kind':'enyo/kind','../GroupItem':'enyo/GroupItem'}],'enyo/TouchScrollStrategy':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./Control':'enyo/Control'}],'enyo/TouchScrollStrategy':[function (module,exports,global,require,request){
 require('enyo');
 require('./touch');
 
@@ -18030,146 +18329,50 @@ module.exports = kind(
 	}
 });
 
-},{'./touch':'enyo/touch','./kind':'enyo/kind','./utils':'enyo/utils','./dispatcher':'enyo/dispatcher','./platform':'enyo/platform','./ScrollMath':'enyo/ScrollMath','./ScrollStrategy':'enyo/ScrollStrategy','./ScrollThumb':'enyo/ScrollThumb','./dom':'enyo/dom'}],'enyo/Button':[function (module,exports,global,require,request){
+},{'./touch':'enyo/touch','./kind':'enyo/kind','./utils':'enyo/utils','./dispatcher':'enyo/dispatcher','./platform':'enyo/platform','./ScrollMath':'enyo/ScrollMath','./ScrollStrategy':'enyo/ScrollStrategy','./ScrollThumb':'enyo/ScrollThumb','./dom':'enyo/dom'}],'enyo/ToolDecorator':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
-* Contains the declaration for the {@link module:enyo/Button~Button} kind.
-* @module enyo/Button
+* Contains the declaration for the {@link module:enyo/ToolDecorator~ToolDecorator} kind.
+* @module enyo/ToolDecorator
 */
+
+
 
 var
 	kind = require('../kind');
 var
-	ToolDecorator = require('../ToolDecorator');
+	GroupItem = require('../GroupItem');
 
 /**
-* {@link module:enyo/Button~Button} implements an HTML [button]{@glossary button}, with support
-* for grouping using {@link module:enyo/Group~Group}.
+* {@link module:enyo/ToolDecorator~ToolDecorator} lines up [components]{@link module:enyo/Component~Component} in a row,
+* centered vertically.
 *
-* For more information, see the documentation on
-* [Buttons]{@linkplain $dev-guide/building-apps/controls/buttons.html} in the
-* Enyo Developer Guide.
-*
-* @class Button
-* @extends module:enyo/ToolDecorator~ToolDecorator
+* @class ToolDecorator
+* @extends module:enyo/GroupItem~GroupItem
 * @ui
 * @public
 */
 module.exports = kind(
-	/** @lends module:enyo/Button~Button.prototype */ {
+	/** @lends module:enyo/ToolDecorator~ToolDecorator.prototype */ {
 
 	/**
 	* @private
 	*/
-	name: 'enyo.Button',
-	
-	/**
-	* @private
-	*/
-	kind: ToolDecorator,
+	name: 'enyo.ToolDecorator',
 
 	/**
 	* @private
 	*/
-	tag: 'button',
+	kind: GroupItem,
 
 	/**
 	* @private
 	*/
-	attributes: {
-		/**
-		 * Set to `'button'`; otherwise, the default value would be `'submit'`, which
-		 * can cause unexpected problems when [controls]{@link module:enyo/Control~Control} are used
-		 * inside of a [form]{@glossary form}.
-		 * 
-		 * @type {String}
-		 * @private
-		 */
-		type: 'button'
-	},
-	
-	/**
-	* @private
-	*/
-	published: 
-		/** @lends module:enyo/Button~Button.prototype */ {
-		
-		/**
-		 * When `true`, the [button]{@glossary button} is shown as disabled and does not 
-		 * generate tap [events]{@glossary event}.
-		 * 
-		 * @type {Boolean}
-		 * @default false
-		 * @public
-		 */
-		disabled: false
-	},
-	
-	/**
-	* @method
-	* @private
-	*/
-	create: kind.inherit(function (sup) {
-		return function() {
-			sup.apply(this, arguments);
-			this.disabledChanged();
-		};
-	}),
-
-	/**
-	* @private
-	*/
-	disabledChanged: function () {
-		this.setAttribute('disabled', this.disabled);
-	},
-
-	/**
-	* @private
-	*/
-	tap: function () {
-		if (this.disabled) {
-			// work around for platforms like Chrome on Android or Opera that send
-			// mouseup to disabled form controls
-			return true;
-		} else {
-			this.setActive(true);
-		}
-	},
-
-	// Accessibility
-
-	/**
-	* @default button
-	* @type {String}
-	* @see enyo/AccessibilitySupport~AccessibilitySupport#accessibilityRole
-	* @public
-	*/
-	accessibilityRole: 'button',
-
-	/**
-	* When `true`, `aria-pressed` will reflect the state of
-	* {@link module:enyo/GroupItem~GroupItem#active}
-	*
-	* @type {Boolean}
-	* @default false
-	* @public
-	*/
-	accessibilityPressed: false,
-
-	/**
-	* @private
-	*/
-	ariaObservers: [
-		{from: 'disabled', to: 'aria-disabled'},
-		{path: ['active', 'accessibilityPressed'], method: function () {
-			this.setAriaAttribute('aria-pressed', this.accessibilityPressed ? String(this.active) : null);
-		}},
-		{from: 'accessibilityRole', to: 'role'}
-	]
+	classes: 'enyo-tool-decorator'
 });
 
-},{'../kind':'enyo/kind','../ToolDecorator':'enyo/ToolDecorator'}],'enyo/TranslateScrollStrategy':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../GroupItem':'enyo/GroupItem'}],'enyo/TranslateScrollStrategy':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -18539,7 +18742,146 @@ module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./dispatcher':'enyo/dispatcher','./TouchScrollStrategy':'enyo/TouchScrollStrategy','./dom':'enyo/dom'}],'enyo/Scroller':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./dispatcher':'enyo/dispatcher','./TouchScrollStrategy':'enyo/TouchScrollStrategy','./dom':'enyo/dom'}],'enyo/Button':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Button~Button} kind.
+* @module enyo/Button
+*/
+
+var
+	kind = require('../kind');
+var
+	ToolDecorator = require('../ToolDecorator');
+
+/**
+* {@link module:enyo/Button~Button} implements an HTML [button]{@glossary button}, with support
+* for grouping using {@link module:enyo/Group~Group}.
+*
+* For more information, see the documentation on
+* [Buttons]{@linkplain $dev-guide/building-apps/controls/buttons.html} in the
+* Enyo Developer Guide.
+*
+* @class Button
+* @extends module:enyo/ToolDecorator~ToolDecorator
+* @ui
+* @public
+*/
+module.exports = kind(
+	/** @lends module:enyo/Button~Button.prototype */ {
+
+	/**
+	* @private
+	*/
+	name: 'enyo.Button',
+	
+	/**
+	* @private
+	*/
+	kind: ToolDecorator,
+
+	/**
+	* @private
+	*/
+	tag: 'button',
+
+	/**
+	* @private
+	*/
+	attributes: {
+		/**
+		 * Set to `'button'`; otherwise, the default value would be `'submit'`, which
+		 * can cause unexpected problems when [controls]{@link module:enyo/Control~Control} are used
+		 * inside of a [form]{@glossary form}.
+		 * 
+		 * @type {String}
+		 * @private
+		 */
+		type: 'button'
+	},
+	
+	/**
+	* @private
+	*/
+	published: 
+		/** @lends module:enyo/Button~Button.prototype */ {
+		
+		/**
+		 * When `true`, the [button]{@glossary button} is shown as disabled and does not 
+		 * generate tap [events]{@glossary event}.
+		 * 
+		 * @type {Boolean}
+		 * @default false
+		 * @public
+		 */
+		disabled: false
+	},
+	
+	/**
+	* @method
+	* @private
+	*/
+	create: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			this.disabledChanged();
+		};
+	}),
+
+	/**
+	* @private
+	*/
+	disabledChanged: function () {
+		this.setAttribute('disabled', this.disabled);
+	},
+
+	/**
+	* @private
+	*/
+	tap: function () {
+		if (this.disabled) {
+			// work around for platforms like Chrome on Android or Opera that send
+			// mouseup to disabled form controls
+			return true;
+		} else {
+			this.setActive(true);
+		}
+	},
+
+	// Accessibility
+
+	/**
+	* @default button
+	* @type {String}
+	* @see enyo/AccessibilitySupport~AccessibilitySupport#accessibilityRole
+	* @public
+	*/
+	accessibilityRole: 'button',
+
+	/**
+	* When `true`, `aria-pressed` will reflect the state of
+	* {@link module:enyo/GroupItem~GroupItem#active}
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
+	*/
+	accessibilityPressed: false,
+
+	/**
+	* @private
+	*/
+	ariaObservers: [
+		{from: 'disabled', to: 'aria-disabled'},
+		{path: ['active', 'accessibilityPressed'], method: function () {
+			this.setAriaAttribute('aria-pressed', this.accessibilityPressed ? String(this.active) : null);
+		}},
+		{from: 'accessibilityRole', to: 'role'}
+	]
+});
+
+},{'../kind':'enyo/kind','../ToolDecorator':'enyo/ToolDecorator'}],'enyo/Scroller':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
