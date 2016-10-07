@@ -56,3 +56,61 @@ body {
   height: 100%;
 }
 
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+.panels-sample-flickr-panels {
+  color: #fff;
+  background-color: #ACB19A;
+}
+.panels-sample-flickr-item {
+  position: relative;
+  border-bottom: 1px solid #0E0E0E;
+  padding: 12px 16px;
+  background-color: #333333;
+}
+.panels-sample-flickr-item.onyx-selected {
+  background-color: MidnightBlue;
+}
+.panels-sample-flickr-title {
+  font-size: 1.3em;
+}
+.panels-sample-flickr-thumbnail {
+  width: 75px;
+  height: 75px;
+}
+.panels-sample-flickr-more-button {
+  color: white;
+  margin: 10px;
+}
+.panels-sample-flickr-more-spinner {
+  vertical-align: middle;
+  margin: -4px 0 0 4px;
+}
+.panels-sample-flickr-center {
+  margin: auto;
+}
+.panels-sample-flickr-main {
+  background-color: #333;
+}
+.panels-sample-flickr-image {
+  box-sizing: border-box;
+  max-height: 90%;
+  max-width: 90%;
+  border: solid 5px #CCC;
+  box-shadow: 1px 1px 5px #999;
+  width: auto;
+  height: auto;
+}
+.panels-sample-flickr-image.wide {
+  width: 100%;
+}
+@media all and (max-width: 800px) {
+  .panels-sample-flickr-image.wide {
+    width: auto;
+  }
+}
+.panels-sample-flickr-image.tall {
+  height: 100%;
+}
+

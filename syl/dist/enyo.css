@@ -1,5 +1,6 @@
 /* things we always want */
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
+@import 'https://fonts.googleapis.com/css?family=Open+Sans';
 body {
   font-family: 'Helvetica Neue', 'Nimbus Sans L', Arial, sans-serif;
 }
@@ -174,6 +175,24 @@ body .enyo-fullscreen {
   left: 0;
   bottom: 2px;
   height: 4px;
+}
+
+.enyo-tool-decorator {
+  display: inline-block;
+}
+.enyo-tool-decorator > * {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* reset */
+button {
+  font-size: inherit;
+  font-family: inherit;
+}
+button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
 }
 
 .enyo-scroller {
