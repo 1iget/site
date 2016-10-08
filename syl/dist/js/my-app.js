@@ -51,6 +51,7 @@ function createContentPage() {
 }
 
 $$('#signInButton').on('click', function () {
+        myApp.showPreloader();
         Parse.User.logIn(document.querySelector('#username').value, document.querySelector('#password').value, {
             success: function(user) {
                 document.querySelector('#username').value = '';
@@ -64,6 +65,7 @@ $$('#signInButton').on('click', function () {
 });
 
 $$('#signUpButton').on('click', function () {
+        myApp.showPreloader();
         Parse.User.signUp(document.querySelector('#username').value, document.querySelector('#password').value,  { ACL: new Parse.ACL() }, {
             success: function(user) {
                 document.querySelector('#username').value = '';
@@ -78,7 +80,9 @@ $$('#signUpButton').on('click', function () {
 });
 
 $$('#logoutButton').on('click', function() {
+    myApp.showPreloader();
     Parse.User.logOut().then(function(){
+        myApp.closeModal();
         myApp.loginScreen();
         myApp.closePanel();
     }.bind(this));
