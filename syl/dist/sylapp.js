@@ -216,7 +216,7 @@ module.exports = kind({
 	components: [
          {kind: Scroller, fit:true, touch: true, components:[
             // {kind:Image, src:'assets/logo.png', style:'margin-bottom:15px'},
-            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;', components:[
+            {classes:'demo-card-wide mdl-card mdl-shadow--2dp', style:'margin-top:15px;width:90%;', components:[
                 {classes:'mdl-card__title', components:[
                     {tag:'h2', classes:'mdl-card__title-text', content:'Signup'},
                 ]},
@@ -386,6 +386,7 @@ module.exports = kind({
 
 var ready = require('enyo/ready');
 var kind = require('enyo/kind');
+var Router = require('enyo/Router');
 var schools = require('./src/schools');
 var splash = require('./src/splash');
 var login = require('./src/login');
@@ -399,6 +400,41 @@ Parse.initialize('RXtuddMFmzKl4Z1VL98OxKUKmRyWxczNEO1XXg3Z', 'ne1XrN3l6x13UQ4iti
 Parse.serverURL = 'https://parseapi.back4app.com/';
 
 ready(function() {
+
+	var  router = new Router({
+			name: 'History.Routes',
+			kind: 'Router',
+			history: true,
+			
+			//the routes we support, these should generally match the views
+			//unless you know what you are doing here
+			routes: [{
+				path: '!login',
+				default: false,
+				handler: 'handleRoute'
+			},{
+				path: '!signup',
+				default: false,
+				handler: 'handleRoute'
+			},
+			{
+				path: '!logout',
+				default: false,
+				handler: 'handleRoute'
+			},
+			{
+				path: '/',
+				default: true,
+				handler: 'default'
+			}],
+			default: function() {
+				this.app.verifyUser();
+			},
+			handleRoute: function(route) {
+				this.app.navigateTo(route.replace('!',''));
+			}
+	});
+
 	var app = kind({
 		components:[
 			{
@@ -417,7 +453,7 @@ ready(function() {
 				kind: login,
 				events: {
 					'onLoggedIn': 'handleLoggedIn',
-					'onNewAccount': 'handleNewAccount'
+					'onNewAccount': 'requestNewAccount'
 				}
 			},
 			{
@@ -436,18 +472,44 @@ ready(function() {
 				}
 			}
 		],
+		showSplash: function(callback) {
+			if(!this.wasLoaded)	{
+				this.$.splash.show();
+				setTimeout(function(){
+					this.wasLoaded = true;
+					callback();
+				}.bind(this), 1000);
+			} else {
+				callback()
+			}
+		},
+		requestNewAccount: function(){
+			location.href = '#!signup';
+		},
+		navigateTo: function(toWhere) {
+			switch(toWhere) {
+					case 'signup': 
+						this.handleNewAccount();
+						break;
+					case 'login': 
+						this.resetView();
+						this.$.login.show();
+						break;
+					case 'logout':
+						location.href="#!login"
+					default:
+						this.bootstrap();
+				}
+		},
 		verifyUser: function(){
-			setTimeout(function(){
-				this.$.splash.hide();
-					
+			this.showSplash(function(){
 				// check to see if user is logged in
 				if (Parse.User.current()) {
 					this.$.chrome.show();
 				} else {
-					this.$.login.show();
+					location.href = '#!login';
 				}
-
-			}.bind(this), 1000);
+			}.bind(this));
 		},
 		resetView: function(){
 				this.$.schoolSelector.hide();
@@ -460,15 +522,10 @@ ready(function() {
 				this.resetView();
 				this.verifyUser();
 		},
-		create: kind.inherit(function (sup) {
-			return function() {
-				sup.apply(this, arguments);
-				this.bootstrap();
-			};
-		}),
 		rendered: kind.inherit(function (sup) {
 			return function() {
 				sup.apply(this, arguments);
+				this.resetView();
 			};
 		}),
 		handleOnSchoolSelected: function(event, sender) {
@@ -480,7 +537,7 @@ ready(function() {
 			this.$.signup.show();
 		},
 		handleLogout: function() {
-			this.bootstrap();
+			location.href = "#!logout"
 		},
 		handleLoggedIn: function() {
 			this.$.chrome.render();
@@ -490,8 +547,9 @@ ready(function() {
 			this.$.signup.hide();
 		}
 	});
-	var App = new app();
-	App.renderInto(document.body);
+
+	router.app = new app();
+	router.app.renderInto(document.body);
 });
 
 },{'./src/schools':'src/schools','./src/splash':'src/splash','./src/login':'src/login','./src/signup':'src/signup','./src/chrome':'src/chrome','./lib/parse.min.js':'lib/parse.min','./lib/material.min.js':'lib/material.min'}]

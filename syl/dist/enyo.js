@@ -4300,7 +4300,210 @@ module.exports = {
 	}
 };
 
-},{'../dom':'enyo/dom','../platform':'enyo/platform','../utils':'enyo/utils'}],'enyo/Layout':[function (module,exports,global,require,request){
+},{'../dom':'enyo/dom','../platform':'enyo/platform','../utils':'enyo/utils'}],'enyo/MultipleDispatchSupport':[function (module,exports,global,require,request){
+/**
+* Exports the {@link module:enyo/MultipleDispatchSupport~MultipleDispatchSupport} mixin.
+* @module enyo/MultipleDispatchSupport
+*/
+
+require('enyo');
+
+var
+	kind = require('./kind'),
+	utils = require('./utils');
+
+/**
+* A collection of methods to allow a single {@link module:enyo/Component~Component} to
+* [dispatch]{@link module:enyo/Component~Component#dispatchEvent} a single {@glossary event} to
+* multiple targets. The events are synchronously propagated in the order in
+* which the targets are encountered. Note that this {@glossary mixin} is
+* already applied to a base [kind]{@glossary kind},
+* {@link module:enyo/MultipleDispatchComponent~MultipleDispatchComponent}.
+*
+* @mixin
+* @public
+*/
+var MultipleDispatchSupport = {
+	
+	/**
+	* @private
+	*/
+	name: 'MultipleDispatchSupport',
+	
+	/**
+	* Adds a target for dispatching.
+	*
+	* @param {module:enyo/Component~Component} component - The {@link module:enyo/Component~Component} to add as a dispatch target.
+	* @public
+	*/
+	addDispatchTarget: function (component) {
+		var dt = this._dispatchTargets;
+		if (component && !~utils.indexOf(component, dt)) {
+			dt.push(component);
+		}
+	},
+	/**
+	* Removes a target from dispatching.
+	*
+	* @param {module:enyo/Component~Component} component - The {@link module:enyo/Component~Component} to remove as a dispatch
+	*	target.
+	* @public
+	*/
+	removeDispatchTarget: function (component) {
+		var dt = this._dispatchTargets, i;
+		i = utils.indexOf(component, dt);
+		if (i > -1) {
+			dt.splice(i, 1);
+		}
+	},
+	
+	/**
+	* @private
+	*/
+	bubbleUp: kind.inherit(function (sup) {
+		return function (name, event, sender) {
+			if (this._dispatchDefaultPath) {
+				sup.apply(this, arguments);
+			}
+			var dt = this._dispatchTargets;
+			for (var i=0, t; (t=dt[i]); ++i) {
+				if (t && !t.destroyed) {
+					t.dispatchBubble(name, event, sender);
+				}
+			}
+		};
+	}),
+	
+	/**
+	* @private
+	*/
+	ownerChanged: kind.inherit(function (sup) {
+		return function () {
+			sup.apply(this, arguments);
+			var o = this.owner;
+			this._dispatchDefaultPath = !! o;
+		};
+	}),
+	
+	/**
+	* @private
+	*/
+	constructor: kind.inherit(function (sup) {
+		return function () {
+			this._dispatchTargets = [];
+			return sup.apply(this, arguments);
+		};
+	}),
+	
+	/**
+	* @private
+	*/
+	destroy: kind.inherit(function (sup) {
+		return function () {
+			this._dispatchTargets = null;
+			sup.apply(this, arguments);
+		};
+	}),
+	
+	/**
+	* @private
+	*/
+	_dispatchDefaultPath: false
+};
+
+module.exports = MultipleDispatchSupport;
+
+},{'./kind':'enyo/kind','./utils':'enyo/utils'}],'enyo/ApplicationSupport':[function (module,exports,global,require,request){
+/**
+* Exports the {@link module:enyo/ApplicationSupport~ApplicationSupport} mixin.
+* @module enyo/ApplicationSupport
+*/
+
+require('enyo');
+
+var kind = require('./kind');
+
+/**
+* An internally-used support {@glossary mixin} that is applied to all
+* [components]{@link module:enyo/Component~Component} of an {@link module:enyo/Application~Application} instance
+* (and to their components, recursively). This mixin adds an `app` property to
+* each component -- a local reference to the `Application` instance that
+* the component belongs to.
+* 
+* @mixin
+* @protected
+*/
+var ApplicationSupport = {
+
+	/**
+	* @private
+	*/
+	name: 'ApplicationSupport',
+
+	/**
+	* @private
+	*/
+	adjustComponentProps: kind.inherit(function (sup) {
+		return function (props) {
+			props.app = props.app || this.app;
+			sup.apply(this, arguments);
+		};
+	}),
+
+	/**
+	* @private
+	*/
+	destroy: kind.inherit(function (sup) {
+		return function () {
+			// release the reference to the application
+			this.app = null;
+			sup.apply(this, arguments);
+		};
+	})
+
+};
+
+module.exports = ApplicationSupport;
+
+},{'./kind':'enyo/kind'}],'enyo/ComponentBindingSupport':[function (module,exports,global,require,request){
+/**
+* Exports the {@link module:enyo/ComponentBindingSupport~ComponentBindingSupport} mixin.
+* @module enyo/ComponentBindingSupport
+*/
+
+require('enyo');
+
+var
+	kind = require('./kind');
+
+/**
+* An internally-used {@glossary mixin} applied to {@link module:enyo/Component~Component}
+* instances to better support [bindings]{@link module:enyo/Binding~Binding}.
+*
+* @mixin
+* @protected
+*/
+var ComponentBindingSupport = {
+	
+	/**
+	* @private
+	*/
+	name: 'ComponentBindingSupport',
+	
+	/**
+	* @private
+	*/
+	adjustComponentProps: kind.inherit(function (sup) {
+		return function (props) {
+			sup.apply(this, arguments);
+			props.bindingTransformOwner || (props.bindingTransformOwner = this.getInstanceOwner());
+		};
+	})
+};
+
+module.exports = ComponentBindingSupport;
+
+},{'./kind':'enyo/kind'}],'enyo/Layout':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -4509,97 +4712,7 @@ module.exports = function (Control) {
 
 	return FloatingLayer;
 };
-},{'../kind':'enyo/kind','../platform':'enyo/platform'}],'enyo/ApplicationSupport':[function (module,exports,global,require,request){
-/**
-* Exports the {@link module:enyo/ApplicationSupport~ApplicationSupport} mixin.
-* @module enyo/ApplicationSupport
-*/
-
-require('enyo');
-
-var kind = require('./kind');
-
-/**
-* An internally-used support {@glossary mixin} that is applied to all
-* [components]{@link module:enyo/Component~Component} of an {@link module:enyo/Application~Application} instance
-* (and to their components, recursively). This mixin adds an `app` property to
-* each component -- a local reference to the `Application` instance that
-* the component belongs to.
-* 
-* @mixin
-* @protected
-*/
-var ApplicationSupport = {
-
-	/**
-	* @private
-	*/
-	name: 'ApplicationSupport',
-
-	/**
-	* @private
-	*/
-	adjustComponentProps: kind.inherit(function (sup) {
-		return function (props) {
-			props.app = props.app || this.app;
-			sup.apply(this, arguments);
-		};
-	}),
-
-	/**
-	* @private
-	*/
-	destroy: kind.inherit(function (sup) {
-		return function () {
-			// release the reference to the application
-			this.app = null;
-			sup.apply(this, arguments);
-		};
-	})
-
-};
-
-module.exports = ApplicationSupport;
-
-},{'./kind':'enyo/kind'}],'enyo/ComponentBindingSupport':[function (module,exports,global,require,request){
-/**
-* Exports the {@link module:enyo/ComponentBindingSupport~ComponentBindingSupport} mixin.
-* @module enyo/ComponentBindingSupport
-*/
-
-require('enyo');
-
-var
-	kind = require('./kind');
-
-/**
-* An internally-used {@glossary mixin} applied to {@link module:enyo/Component~Component}
-* instances to better support [bindings]{@link module:enyo/Binding~Binding}.
-*
-* @mixin
-* @protected
-*/
-var ComponentBindingSupport = {
-	
-	/**
-	* @private
-	*/
-	name: 'ComponentBindingSupport',
-	
-	/**
-	* @private
-	*/
-	adjustComponentProps: kind.inherit(function (sup) {
-		return function (props) {
-			sup.apply(this, arguments);
-			props.bindingTransformOwner || (props.bindingTransformOwner = this.getInstanceOwner());
-		};
-	})
-};
-
-module.exports = ComponentBindingSupport;
-
-},{'./kind':'enyo/kind'}],'enyo/MixinSupport':[function (module,exports,global,require,request){
+},{'../kind':'enyo/kind','../platform':'enyo/platform'}],'enyo/MixinSupport':[function (module,exports,global,require,request){
 /**
 * Exports the {@link module:enyo/MixinSupport~MixinSupport} mixin.
 * @module enyo/MixinSupport
@@ -9448,7 +9561,166 @@ function prefixFromKindName (nom) {
 	return pre;
 }
 
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./logger':'enyo/logger','./CoreObject':'enyo/CoreObject','./ApplicationSupport':'enyo/ApplicationSupport','./ComponentBindingSupport':'enyo/ComponentBindingSupport','./jobs':'enyo/jobs'}],'enyo/Animator':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./logger':'enyo/logger','./CoreObject':'enyo/CoreObject','./ApplicationSupport':'enyo/ApplicationSupport','./ComponentBindingSupport':'enyo/ComponentBindingSupport','./jobs':'enyo/jobs'}],'enyo/MultipleDispatchComponent':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/MultipleDispatchComponent~MultipleDispatchComponent} kind.
+* @module enyo/MultipleDispatchComponent
+*/
+
+var
+	kind = require('./kind');
+
+var
+	Component = require('./Component'),
+	MultipleDispatchSupport = require('./MultipleDispatchSupport');
+
+/**
+* {@link module:enyo/MultipleDispatchComponent~MultipleDispatchComponent} is a purely abstract
+* {@glossary kind} that simply provides a common ancestor for
+* {@link module:enyo/Component~Component} [objects]{@glossary Object} that need 
+* the [MultipleDispatchSupport]{@link module:enyo/MultipleDispatchSupport~MultipleDispatchSupport}
+* {@glossary mixin}.
+*
+* @class MultipleDispatchComponent
+* @extends module:enyo/Component~Component
+* @mixes module:enyo/MultipleDispatchSupport~MultipleDispatchSupport
+* @public
+*/
+module.exports = kind(
+	/** @lends module:enyo/MultipleDispatchComponent~MultipleDispatchComponent */ {
+
+	/**
+	* @private
+	*/
+	kind: Component,
+
+	/**
+	* @private
+	*/
+	mixins: [MultipleDispatchSupport]
+});
+
+},{'./kind':'enyo/kind','./Component':'enyo/Component','./MultipleDispatchSupport':'enyo/MultipleDispatchSupport'}],'enyo/Signals':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Signals~Signals} kind.
+* @module enyo/Signals
+*/
+
+var
+	kind = require('./kind'),
+	utils = require('./utils');
+
+var
+	Component = require('./Component');
+
+/**
+* {@link module:enyo/Signals~Signals} is a [component]{@link module:enyo/Component~Component} used to listen
+* to global messages.
+* 
+* An object with a Signals component can listen to messages sent from anywhere
+* by declaring handlers for them.
+* 
+* DOM [events]{@glossary event} that have no node targets are broadcast as
+* signals. These events include Window events, such as `onload` and
+* `onbeforeunload`, as well as events that occur directly on `document`, such
+* as `onkeypress` if `document` has the focus.
+* 
+* For more information, see the documentation on [Event
+* Handling]{@linkplain $dev-guide/key-concepts/event-handling.html} in the
+* Enyo Developer Guide.
+*
+* @class Signals
+* @extends module:enyo/Component~Component
+* @public
+*/
+var Signals = module.exports = kind(
+	/** @lends module:enyo/Signals~Signals.prototype */ {
+
+	name: 'enyo.Signals',
+
+	/**
+	* @private
+	*/
+	kind: Component,
+
+	/**
+	* Needed because of early calls to bind DOM {@glossary event} listeners
+	* to the [enyo.Signals.send()]{@link module:enyo/Signals~Signals#send} call.
+	* 
+	* @private
+	*/
+
+
+	/**
+	* @method
+	* @private
+	*/
+	create: kind.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			Signals.addListener(this);
+		};
+	}),
+
+	/**
+	* @method
+	* @private
+	*/
+	destroy: kind.inherit(function (sup) {
+		return function() {
+			Signals.removeListener(this);
+			sup.apply(this, arguments);
+		};
+	}),
+
+	/**
+	* @private
+	*/
+	notify: function (msg, load) {
+		this.dispatchEvent(msg, load);
+	},
+
+	/**
+	* @private
+	*/
+	protectedStatics: {
+		listeners: [],
+		addListener: function(listener) {
+			this.listeners.push(listener);
+		},
+		removeListener: function(listener) {
+			utils.remove(listener, this.listeners);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	statics: 
+		/** @lends module:enyo/Signals~Signals.prototype */ {
+
+		/**
+		* Broadcasts a global message to be consumed by subscribers.
+		* 
+		* @param {String} msg - The message to send; usually the name of the
+		*	{@glossary event}.
+		* @param {Object} load - An [object]{@glossary Object} containing any
+		*	associated event properties to be accessed by subscribers.
+		* @public
+		*/
+		send: function (msg, load) {
+			utils.forEach(this.listeners, function(l) {
+				l.notify(msg, load);
+			});
+		}
+	}
+});
+
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./Component':'enyo/Component'}],'enyo/Animator':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
@@ -10900,12 +11172,12 @@ module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./platform':'enyo/platform','./animation':'enyo/animation','./Component':'enyo/Component'}],'enyo/Signals':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./platform':'enyo/platform','./animation':'enyo/animation','./Component':'enyo/Component'}],'enyo/Controller':[function (module,exports,global,require,request){
 require('enyo');
 
 /**
-* Contains the declaration for the {@link module:enyo/Signals~Signals} kind.
-* @module enyo/Signals
+* Contains the declaration for the {@link module:enyo/Controller~Controller} kind.
+* @module enyo/Controller
 */
 
 var
@@ -10913,112 +11185,69 @@ var
 	utils = require('./utils');
 
 var
-	Component = require('./Component');
+	MultipleDispatchComponent = require('./MultipleDispatchComponent');
 
 /**
-* {@link module:enyo/Signals~Signals} is a [component]{@link module:enyo/Component~Component} used to listen
-* to global messages.
-* 
-* An object with a Signals component can listen to messages sent from anywhere
-* by declaring handlers for them.
-* 
-* DOM [events]{@glossary event} that have no node targets are broadcast as
-* signals. These events include Window events, such as `onload` and
-* `onbeforeunload`, as well as events that occur directly on `document`, such
-* as `onkeypress` if `document` has the focus.
-* 
-* For more information, see the documentation on [Event
-* Handling]{@linkplain $dev-guide/key-concepts/event-handling.html} in the
-* Enyo Developer Guide.
+* {@link module:enyo/Controller~Controller} is the base [kind]{@glossary kind} for all
+* controllers in Enyo. An abstract kind, `enyo/Controller` is a
+* [delegate]{@glossary delegate}/[component]{@link module:enyo/Component~Component} that
+* is designed to be a proxy for information.
 *
-* @class Signals
-* @extends module:enyo/Component~Component
+* @class Controller
+* @extends module:enyo/MultipleDispatchComponent~MultipleDispatchComponent
 * @public
 */
-var Signals = module.exports = kind(
-	/** @lends module:enyo/Signals~Signals.prototype */ {
+module.exports = kind(
+	/** @lends module:enyo/Controller~Controller.prototype */ {
 
-	name: 'enyo.Signals',
+	name: 'enyo.Controller',
 
 	/**
 	* @private
 	*/
-	kind: Component,
+	kind: MultipleDispatchComponent,
 
 	/**
-	* Needed because of early calls to bind DOM {@glossary event} listeners
-	* to the [enyo.Signals.send()]{@link module:enyo/Signals~Signals#send} call.
-	* 
-	* @private
+	* Set this flag to `true` to make this [controller]{@link module:enyo/Controller~Controller}
+	* available globally, when instanced. When set to `true`, even the
+	* [owner]{@link module:enyo/Component~Component#owner} (if any) cannot
+	* [destroy]{@link module:enyo/Component~Component#destroy} it.
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
 	*/
+	global: false,
 
+	/**
+	* The default source of information for all instances of {@link module:enyo/Controller~Controller}
+	* and its [subkinds]{@glossary subkind}. In some cases, this will be a
+	* [computed property]{@link module:enyo/ComputedSupport} to facilitate overloading.
+	* It may contain any type of data.
+	*
+	* @type {*}
+	* @default null
+	* @public
+	*/
+	data: null,
 
 	/**
 	* @method
 	* @private
 	*/
-	create: kind.inherit(function (sup) {
-		return function() {
+	constructor: kind.inherit(function (sup) {
+		return function () {
 			sup.apply(this, arguments);
-			Signals.addListener(this);
+			// don't attempt to set a controller globally without a name
+			if (this.global && this.name) {
+				utils.setPath.call(global, this.name, this);
+			}
 		};
 	}),
-
-	/**
-	* @method
-	* @private
-	*/
-	destroy: kind.inherit(function (sup) {
-		return function() {
-			Signals.removeListener(this);
-			sup.apply(this, arguments);
-		};
-	}),
-
-	/**
-	* @private
-	*/
-	notify: function (msg, load) {
-		this.dispatchEvent(msg, load);
-	},
-
-	/**
-	* @private
-	*/
-	protectedStatics: {
-		listeners: [],
-		addListener: function(listener) {
-			this.listeners.push(listener);
-		},
-		removeListener: function(listener) {
-			utils.remove(listener, this.listeners);
-		}
-	},
-
-	/**
-	* @private
-	*/
-	statics: 
-		/** @lends module:enyo/Signals~Signals.prototype */ {
-
-		/**
-		* Broadcasts a global message to be consumed by subscribers.
-		* 
-		* @param {String} msg - The message to send; usually the name of the
-		*	{@glossary event}.
-		* @param {Object} load - An [object]{@glossary Object} containing any
-		*	associated event properties to be accessed by subscribers.
-		* @public
-		*/
-		send: function (msg, load) {
-			utils.forEach(this.listeners, function(l) {
-				l.notify(msg, load);
-			});
-		}
-	}
+	_isController: true
 });
 
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./Component':'enyo/Component'}],'enyo/master':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./MultipleDispatchComponent':'enyo/MultipleDispatchComponent'}],'enyo/master':[function (module,exports,global,require,request){
 require('enyo');
 
 var
@@ -12289,7 +12518,425 @@ var UiComponent = module.exports = kind(
 	}
 });
 
-},{'./kind':'enyo/kind','./utils':'enyo/utils','./master':'enyo/master','./Component':'enyo/Component'}],'enyo/resolution':[function (module,exports,global,require,request){
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./master':'enyo/master','./Component':'enyo/Component'}],'enyo/History':[function (module,exports,global,require,request){
+/**
+* The enyo/History singleton is a specialized application history manager.
+* It is built on top of the standard HTML5 History API and centrally manages
+* interactions with that API to reduce the likelihood that "competing" uses
+* of the API within a single app will conflict, causing unpredictable behavior.
+*
+* CAUTION: This API is experimental. It is likely to change or to be removed
+* altogether in a future release.
+*
+* @module enyo/History
+* @wip
+*/
+
+/**
+* Passed to {@link module:enyo/History#push} to add a new history entry and passed as the first
+* argument to {@link module:enyo/History~HistoryEntry#handler} when the entry is popped. Additional
+* properties beyond those defined here may be included to provide additional data to the handler.
+*
+* @example
+* var
+* 	EnyoHistory = require('enyo/History');
+*
+* EnyoHistory.push({
+* 	handler: function (entry) {
+* 		console.log('Entry added at ', entry.time, 'and popped at', Date.now());
+* 	},
+* 	time: Date.now()
+* });
+*
+* @typedef {Object} module:enyo/History~HistoryEntry
+* @property {Function|String} handler - Function called when this history entry is popped. May
+* 	either be a Function or the name of a function on `context`.
+* @property {Object} [context] - Context on which `handler` is bound
+* @property {String} [location] - When {@link module:enyo/History#isSupported} is `true`, updates
+* 	the displayed URL. Must be within the same origin.
+*/
+
+var
+	dispatcher = require('enyo/dispatcher'),
+	kind = require('enyo/kind'),
+	utils = require('enyo/utils'),
+	Component = require('enyo/Component'),
+	Signals = require('enyo/Signals');
+
+var
+	// App history, ordered from oldest to newest.
+	_history = [],
+
+	// History actions that were queued because a back operation was in progress. These will be
+	// dequeued when the next popstate event is handled
+	_queue = [],
+
+	// Indicates the number of steps 'back' in history requested
+	_popQueueCount = 0,
+
+	// `true` if a push action has been enqueued
+	_pushQueued = false,
+
+	// Track if we're in the midst of handling a pop
+	_processing = false,
+
+	// If history were disabled or clear called during processing, we can't continue to process the
+	// queue which will need to resume after the clear processes.
+	_abortQueueProcessing = false,
+
+	// `true` if the platform support the HTML5 History API
+	_supports = !!global.history.pushState;
+
+var EnyoHistory = module.exports = kind.singleton(
+	/** @lends module:enyo/History~History.prototype */ {
+
+	/**
+	* @private
+	*/
+	kind: Component,
+
+	/**
+	* When enabled, enyo/History will handle onpopstate events and notify controls when their
+	* history entry is popped.
+	*
+	* @type {Boolean}
+	* @default true
+	* @public
+	*/
+	enabled: true,
+
+	/**
+	* When true, the browser's history will be updated when history entries are added or removed. If
+	* the platform does not support this feature, the value will always be false. The default is
+	* true if supported by the platform and false otherwise.
+	*
+	* @type {Boolean}
+	* @private
+	*/
+	updateHistory: _supports,
+
+	/**
+	* @private
+	*/
+	components: [
+		{kind: Signals,  onkeyup: 'handleKeyUp'}
+	],
+
+	/**
+	* @private
+	*/
+	enabledChanged: function () {
+		// reset private members
+		if (!this.enabled) this.clear();
+	},
+
+	/**
+	* Resets the value to false if the platform does not support the History API
+	*
+	* @private
+	*/
+	updateHistoryChanged: function () {
+		this.updateHistory = this.updateHistory && _supports;
+	},
+
+	// Public methods
+
+	/**
+	* Adds a new history entry
+	*
+	* @param  {module:enyo/History~HistoryEntry} entry Object describing the history entry
+	*
+	* @public
+	*/
+	push: function (entry) {
+		if (this.enabled) {
+			if (_popQueueCount) {
+				this.enqueuePush(entry);
+			} else {
+				this.pushEntry(entry);
+			}
+		}
+	},
+
+	/**
+	* Asynchronously removes `count` entries from the history invoking the callback for each if it
+	* exists.
+	*
+	* @param  {Number} count Number of entries to remove
+	*
+	* @oublic
+	*/
+	pop: function (count) {
+		if (!this.enabled) return;
+		this.enqueuePop('pop', count);
+	},
+
+	/**
+	* Asynchronously removes `count` entries from the history without invoking the callbacks for
+	* each.
+	*
+	* @param  {Number} count Number of entries to remove
+	*
+	* @public
+	*/
+	drop: function (count) {
+		if (!this.enabled) return;
+		this.enqueuePop('drop', count);
+	},
+
+	/**
+	* Returns the latest history entry without removing it.
+	*
+	* @return {module:enyo/History~HistoryEntry}
+	* @public
+	*/
+	peek: function () {
+		return _history[_history.length - 1];
+	},
+
+	/**
+	* Clears all history entries without calling their respective handlers. When the
+	* entries are popped, the internal history will be empty and the browser history will be
+	* reset to the state when this module started tracking the history.
+	*
+	* @public
+	*/
+	clear: function () {
+		var ql = _queue.length,
+			hl = _history.length;
+
+		_popQueueCount = 0;
+		_pushQueued = false;
+		_abortQueueProcessing = _processing;
+		_processing = false;
+		if (ql) _queue.splice(0, ql);
+		if (hl) this.drop(hl);
+	},
+
+	/**
+	* Returns `true` when enyo/History is currently handling a popstate event and invoking the
+	* callbacks for any popped entries.
+	*
+	* @return {Boolean}
+	* @public
+	*/
+	isProcessing: function () {
+		return _processing;
+	},
+
+	/**
+	* Returns `true` when the HTML5 history API is supported by the platform
+	*
+	* @return {Boolean}
+	* @public
+	*/
+	isSupported: function () {
+		return _supports;
+	},
+
+	// Private methods
+
+	/**
+	* Handles flushing the history action queus and processing each entry. When the queues are
+	* empty and a popstate event occurs, this pops the next entry and processes it.
+	*
+	* @param  {Object} state Value of the state member of the PopStateEvent
+	*
+	* @private
+	*/
+	processState: function (state) {
+		_processing = true;
+		if (_queue.length) {
+			this.processQueue();
+		} else if (_history.length) {
+			this.processPopEntry(_history.pop());
+		}
+		_processing = false;
+	},
+
+	/**
+	* Processes any queued actions
+	*
+	* @private
+	*/
+	processQueue: function () {
+		var next, i, entries;
+
+		this.silencePushEntries();
+
+		while (_queue.length && !_abortQueueProcessing) {
+			next = _queue.shift();
+
+			if (next.type === 'push') {
+				this.pushEntry(next.entry, next.silenced);
+			} else {
+				_popQueueCount -= next.count;
+				entries = _history.splice(_history.length - next.count, next.count);
+				// if a 'pop' was requested
+				if (next.type == 'pop') {
+					// iterate the requested number of history entries
+					for (i = entries.length - 1; i >= 0; --i) {
+						// and call each handler if it exists
+						this.processPopEntry(entries[i]);
+					}
+				}
+				// otherwise we just drop the entries and do nothing
+			}
+		}
+		if (_abortQueueProcessing) {
+			_abortQueueProcessing = false;
+		} else {
+			_popQueueCount = 0;
+			_pushQueued = false;
+		}
+	},
+
+	/**
+	* Marks any queued push entries as silenced that would be popped by a subsequent queued pop or
+	* drop entry.
+	*
+	* @private
+	*/
+	silencePushEntries: function () {
+		var i, next,
+			silence = 0;
+
+		for (i = _queue.length - 1; i >= 0; --i) {
+			next = _queue[i];
+			if (next.type == 'push') {
+				if (silence) {
+					silence -= 1;
+					next.silenced = true;
+				} else {
+					next.silenced = false;
+				}
+			} else {
+				silence += next.count;
+			}
+		}
+	},
+
+	/**
+	* Invokes the callback for a pop entry
+	*
+	* @param  {module:enyo/History~HistoryEntry} entry
+	*
+	* @private
+	*/
+	processPopEntry: function (entry) {
+		if (entry.handler) {
+			utils.call(entry.context, entry.handler, [entry]);
+		}
+	},
+
+	/**
+	* Adds an pop or drop entry to the history queue
+	*
+	* @param  {String} type  History action type ('pop' or 'drop')
+	* @param  {Number} [count] Number of actions to invoke. Defaults to 1.
+	*
+	* @private
+	*/
+	enqueuePop: function (type, count) {
+		count = count || 1;
+		this.addToQueue({type: type, count: count});
+		// if we've only queued pop/drop events, we need to increment the number of entries to go
+		// back. once a push is queued, the history must be managed in processState.
+		if (!_pushQueued) {
+			_popQueueCount += count;
+		}
+		if (_queue.length === 1) {
+			// defer the actual 'back' action so pop() or drop() can be called multiple times in the
+			// same frame. Otherwise, only the first go() would be observed.
+			this.startJob('history.go', function () {
+				// If we are able to and supposed to update history and there are pending pops
+				if (this.updateHistory && _popQueueCount > 0) {
+					// go back that many entries
+					global.history.go(-_popQueueCount);
+				} else {
+					// otherwise we'll start the processing
+					this.handlePop({
+						state: this.peek()
+					});
+				}
+			});
+		}
+	},
+
+	/**
+	* Adds a push entry to the history queue
+	*
+	* @param  {module:enyo/History~HistoryEntry} entry
+	*
+	* @private
+	*/
+	enqueuePush: function (entry) {
+		_pushQueued = true;
+		this.addToQueue({type: 'push', entry: entry});
+	},
+
+	/**
+	* When entries are added while processing the queue, the new entries should be added at the top
+	* of the queue rather than the end because the queue is processed FIFO and the assumption of
+	* adding them mid-process is that they are being added at the point in the queue processing in
+	* which they are called.
+	*
+	* @private
+	*/
+	addToQueue: function (entry) {
+		if (_processing) {
+			_queue.unshift(entry);
+			this.silencePushEntries();
+		} else {
+			_queue.push(entry);
+		}
+	},
+
+	/**
+	* Adds an new entry to the _history and pushes the new state to global.history (if supported)
+	*
+	* @param  {module:enyo/History~HistoryEntry} entry
+	* @param  {Boolean} silenced Prevents pushing the state onto history when `true`
+	*
+	* @private
+	*/
+	pushEntry: function (entry, silenced) {
+		var id = entry.context && entry.context.id || 'anonymous',
+			location = entry.location || '';
+		_history.push(entry);
+		if (this.updateHistory && !silenced) {
+			global.history.pushState({id: id}, '', location);
+		}
+	},
+
+	/**
+	* onpopstate handler
+	*
+	* @private
+	*/
+	handlePop: function (event) {
+		if (this.enabled) {
+			this.processState(event.state);
+		}
+	},
+
+	/**
+	* onkeyup handler
+	*
+	* @private
+	*/
+	handleKeyUp: function (sender, event) {
+		var current = this.peek();
+		if (event.keySymbol == 'back' && current && current.context.getShowing()) {
+			this.pop();
+		}
+		return true;
+	}
+
+});
+
+dispatcher.listen(global, 'popstate', EnyoHistory.handlePop.bind(EnyoHistory));
+}],'enyo/resolution':[function (module,exports,global,require,request){
 require('enyo');
 
 var
@@ -14010,7 +14657,614 @@ module.exports = {
 	}
 };
 
-},{'../dispatcher':'enyo/dispatcher','../utils':'enyo/utils'}],'enyo/gesture':[function (module,exports,global,require,request){
+},{'../dispatcher':'enyo/dispatcher','../utils':'enyo/utils'}],'enyo/Router':[function (module,exports,global,require,request){
+require('enyo');
+
+/**
+* Contains the declaration for the {@link module:enyo/Router~Router} kind.
+* @module enyo/Router
+*/
+
+var
+	kind = require('./kind'),
+	utils = require('./utils'),
+	ready = require('./ready'),
+	dispatcher = require('./dispatcher');
+
+var
+	Controller = require('./Controller'),
+	EnyoHistory = require('./History');
+
+/**
+* Any instance of a router will be referenced here for the global hash change handler.
+*
+* @private
+*/
+var listeners = [];
+
+/**
+* This is the intended global `window.hashchange` event handler. If another handler is
+* arbitrarily registered for this event, then it will not fire.
+*
+* @private
+*/
+var hashDidChange = function (hash) {
+	var list = listeners;
+	var len = list.length;
+	var idx = 0;
+	for (; idx < len; ++idx) {
+		list[idx]._hashChanged(hash);
+	}
+};
+
+/*
+* @private
+*/
+var token = /\:[a-zA-Z0-9]*/g;
+
+/*
+* @private
+*/
+var prepare = function (str) {
+	return str[0] === '#'? str.slice(1): str;
+};
+
+/**
+* All of our actively-supported browsers support this method of registering
+* for `hashchange` events.
+*
+* @private
+*/
+ready(function () {
+	dispatcher.listen(global, 'hashchange', hashDidChange);
+});
+
+/**
+* {@link module:enyo/Router~Router} is a controller with the ability to interpret changes in
+* the URL and make changes to the URL in a manner that is compatible across
+* browsers. With defined route handling, the application state can be managed
+* more closely with respect to the location state of the browser. There may be
+* multiple router instances active at any one time. Routers only interact with
+* the hash portion of the browser location and will not force a reload of the
+* current page.
+*
+* [Routes]{@link module:enyo/Router~Router#routes} may be defined in several ways and
+* may be added at startup or [added programmatically]{@link module:enyo/Router~Router#addRoute}
+* at a later time.
+*
+* A route is a declarative hash with the following structure:
+*
+* ```
+* {path: 'some/path', handler: 'function', context: 'context'}
+* ```
+*
+* The `path` is a string that may be static (explicitly matched) or dynamic
+* (matched based on dynamic placeholders). Dynamic paths may name elements to
+* be matched, e.g.:
+*
+* ```
+* {path: ':user/:id'}
+* ```
+*
+* In this case, `handler` would be called with two parameters filled with
+* the values matched by that structure. It is important to note that a dynamic
+* route will apply the first match it finds, so care must be taken to ensure
+* that the correct route is matched (e.g., `/users/:user/:id` is more exact
+* because it includes the static `users` portion of the path).
+*
+* `handler` may be a function reference or a string that will be mapped to a
+* function. A check for the function's existence is conducted first on the
+* router, then on any provided context, and finally in the global scope. If a
+* context is provided, the function will be executed under that context
+* regardless of where the function was found.
+*
+* The `context` property may be an object, an instance, or a string that will
+* be mapped to an object, if possible.
+*
+* Note that, currently, only letters and numbers are supported in dynamic routes.
+* 
+* @class Router
+* @extends module:enyo/Controller~Controller
+* @public
+*/
+module.exports = kind(
+	/** @lends module:enyo/Router~Router.prototype */ {
+
+	name: 'enyo.Router',
+
+	// ...........................
+	// PUBLIC PROPERTIES
+
+	/**
+	* If `true`, the router will respond to hash changes or internal events. If this flag is set
+	* to `false`, it will stop responding. This may be changed at any time.
+	*
+	* @type {Boolean}
+	* @default true
+	* @public
+	*/
+	listening: true,
+
+	/**
+	* If `true`, the router will neither respond to hash changes in the browser
+	* nor be able to trigger them. Instead, the router may be used internally to
+	* maintain or trigger state changes in an application without changing
+	* location.
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
+	*/
+	internalOnly: false,
+
+	/**
+	* Set this to `true` to force the current browser location to a particular
+	* path on startup. This flag will be ignored if
+	* [triggerOnStart]{@link module:enyo/Router~Router#triggerOnStart} is `false`.
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
+	*/
+	defaultPathOnStart: false,
+
+	/**
+	* The `defaultRoute` should have the same structure as a normal route (hash). It may be
+	* arbitrarily assigned to this property or mixed into the
+	* [routes]{@link module:enyo/Router~Router#routes} array with a special `default: true` flag set. For
+	* any unmatched hash changes, this route will be executed and passed the path that was not
+	* matched.
+	*
+	* @type {Object}
+	* @default null
+	* @public
+	*/
+	defaultRoute: null,
+
+	/**
+	* By default, when a router is created, it will attempt to trigger the correct route for the
+	* current browser location. Set this flag to `false` to prevent this behavior.
+	*
+	* @type {Boolean}
+	* @default true
+	* @public
+	*/
+	triggerOnStart: true,
+
+	/**
+	* The router will attempt to track history based on the events that have been generated
+	* through it. This allows the usage of the browser's 'Back' and 'Forward' buttons.
+	*
+	* @type {Boolean}
+	* @default false
+	* @public
+	*/
+	useHistory: false,
+
+	/**
+	* The `routes` [array]{@glossary Array} specifies the handlers for
+	* the current Router instance. Routes are string paths, static or dynamic,
+	* that route particular `hashchange` events. They are defined in an array of
+	* [hashes]{@glossary Object} with a `handler` (function name), `path`
+	* (for static and dynamic paths), an optional `context` (for the `handler`),
+	* or a `default` Boolean `true`|`false` value indicating whether the handler
+	* should be used when no other route can handle the `hashchange` event.
+	*
+	* @example
+	* routes: [
+	*     {path: 'users/:userName', handler: 'loadUser'},
+	*     {path: 'users', handler: 'usersIndex'},
+	*     {path: 'about/moreDetail', handler: 'detailedAboutScreen'},
+	*     {path: 'about', handler: 'aboutScreen'},
+	*     {path: 'home', handler: 'homeScreen', default: true},
+	*     {path: '', handler: 'handleBlankRoute'}
+	* ]
+	*
+	* @type {Array}
+	* @public
+	*/
+	routes: null,
+
+	// ...........................
+	// PROTECTED PROPERTIES
+
+	/*
+	* @private
+	*/
+	kind: Controller,
+
+	/*
+	* @private
+	*/
+	_staticRoutes: null,
+
+	/*
+	* @private
+	*/
+	_dynamicRoutes: null,
+
+	/*
+	* @private
+	*/
+	_current: '',
+
+	// ...........................
+	// COMPUTED PROPERTIES
+
+	computed: [
+		{method: 'location', path: '_current', config: {cached: true}},
+		{method: 'defaultPath'}
+	],
+
+	/**
+	* A computed property that returns the location as known by this router. This property
+	* will be synchronized with [window.location.hash]{@glossary window.location}
+	* unless the [internalOnly]{@link module:enyo/Router~Router#internalOnly} flag is set to `true`.
+	* Passing a string to this property via `_set('location', 'mylocation')` will update the
+	* inner location known by this router.
+	*
+	* @public
+	*/
+	location: function (loc) {
+		if (loc) {
+			loc = prepare(loc);
+			if (!this.internalOnly) {
+				utils.asyncMethod(this, 'trigger', {location: loc, change: true});
+			} else {
+				this.set('_current', loc);
+			}
+		} else {
+			return prepare(this.get('_current'));
+		}
+	},
+
+	/**
+	* Returns the string for the default path, or an empty string if no default
+	* path exists.
+	*
+	* @public
+	*/
+	defaultPath: function () {
+		return this.defaultRoute ? this.defaultRoute.path: '';
+	},
+
+	// ...........................
+	// PUBLIC METHODS
+
+	/**
+	* Triggers a change without necessarily requiring a change to occur. If
+	* called without a parameter, it will force the route that matches the
+	* current browser location to fire. If a string is passed in, this method
+	* will trigger an internal-only event (i.e., the browser location will not
+	* be changed). If it is passed a hash, the method will try to use a
+	* `location` property while looking for optional `change` and `global`
+	* properties.
+	*
+	* If the `change` property is present and `true`, it will force a
+	* [location.hash]{@glossary window.location} change in the
+	* browser (this is always global). If the `global` property is present and
+	* `true` and `change` is not present or `false`, it will trigger an internal
+	* event that all routers will respond to (not just this instance).
+	*
+	* @public
+	*/
+	trigger: function (params) {
+		if (!params) {
+			params = {location: this.get('_current')};
+		} else if ('string' === typeof params) {
+			params = {location: params};
+		}
+		var loc = params.location;
+		var isGlobal = params.global;
+		var change = params.change;
+		var current = this.get('location');
+		if (change) {
+			if (current !== loc) {
+				if (EnyoHistory.isSupported()) {
+					this.addHistory(loc);
+					this._hashChanged(loc);
+				} else {
+					global.location.hash = loc;
+				}
+			} else {
+				this._hashChanged(loc);
+			}
+		} else {
+			if (isGlobal) {
+				hashDidChange(loc);
+			} else {
+				this._hashChanged(loc);
+			}
+		}
+	},
+
+	/**
+	* In very rare circumstances, it may be useful to pass a path to the
+	* [routes]{@link module:enyo/Router~Router#routes} without using
+	* [trigger()]{@link module:enyo/Router~Router#trigger} or global hash changes with
+	* `path` being a string that will be evaluated against the routes owned by
+	* this router.
+	*
+	* @param {String} path - A path to test against this router's
+	*	[routes]{@link module:enyo/Router~Router#routes}.
+	* @public
+	*/
+	handle: function (path) {
+		// fast track is to check against static routes first
+		if (this._handleStatic(path)) {
+			return;
+		}
+		// then we check against dynamic paths in this simple scheme
+		else if (this._handleDynamic(path)) {
+			/* do nothing */
+		}
+		else {
+			this._handleDefault(path);
+		}
+	},
+
+	/**
+	* If history is enabled and some history exists, attempts to revert the
+	* current known location to the previous one in the stack.
+	*
+	* @public
+	*/
+	back: function () {
+		if (this.useHistory) {
+			EnyoHistory.pop();
+		}
+	},
+
+	/**
+	* Arbitrarily adds history at the lowest (first) position in the stack. Returns callee for
+	* chaining.
+	*
+	* @param {String} location - The location string to add to the history.
+	* @returns {this} The callee for chaining.
+	* @public
+	*/
+	addHistory: function (location) {
+		if (this.useHistory) {
+			if (location[0] !== '#') location = '#' + location;
+			EnyoHistory.push({context: this, handler: '_handlePopHistory', location: location});
+		}
+		return this;
+	},
+
+	/**
+	* Clears any history the router has stored. Returns callee for chaining.
+	*
+	* @returns {this} The callee for chaining.
+	* @public
+	*/
+	clearHistory: function () {
+		EnyoHistory.clear();
+		return this;
+	},
+
+	/**
+	* May be used to programmatically add [routes]{@link module:enyo/Router~Router#routes}
+	* to the router. `route` is a hash as described by the
+	* [routes]{@link module:enyo/Router~Router#routes} array. Returns callee for chaining.
+	*
+	* @param {Object} route - The route to add.
+	* @returns {this} The callee for chaining.
+	* @public
+	*/
+	addRoute: function (route) {
+		var statics = this._staticRoutes;
+		var dynamic = this._dynamicRoutes;
+		var regex;
+		if (true === route['default']) {
+			this.defaultRoute = route;
+		}
+		else if (token.test(route.path)) {
+			token.lastIndex = 0;
+			// regex = new RegExp(route.path.replace(token, '([a-zA-Z0-9-]*)'));
+			regex = new RegExp(route.path.replace(token, '([a-zA-Z0-9-.]*)'));
+			route.regex = regex;
+			dynamic.push(route);
+		} else {
+			statics[route.path] = route;
+		}
+		return this;
+	},
+
+	// ...........................
+	// PROTECTED METHODS
+
+	/*
+	* @private
+	*/
+	constructor: kind.inherit(function (sup) {
+		return function () {
+			this._staticRoutes = {};
+			this._dynamicRoutes = [];
+			this.routes = this.routes || [];
+			sup.apply(this, arguments);
+		};
+	}),
+
+	/*
+	* @private
+	*/
+	create: kind.inherit(function (sup) {
+		return function () {
+			sup.apply(this, arguments);
+			// make sure to initialize our routes prior
+			// to registering for events
+			this._setupRoutes();
+			// make sure we're up to date
+			this.set('_current', prepare(window.location.hash));
+			// ok, register for events
+			listeners.push(this);
+			// ok, if we need to go ahead and route our current
+			// location, lets do it, but let create finish first
+			if (this.triggerOnStart) {
+				if (this.defaultPathOnStart) {
+					utils.asyncMethod(this, 'trigger', {change: true, location: this.get('defaultPath')});
+				} else {
+					utils.asyncMethod(this, 'trigger');
+
+				}
+			}
+		};
+	}),
+
+	/*
+	* @private
+	*/
+	destroy: kind.inherit(function (sup) {
+		return function () {
+			var idx = utils.indexOf(this, listeners);
+			if (!~idx) {
+				listeners.splice(idx, 1);
+			}
+			sup.apply(this, arguments);
+		};
+	}),
+
+	/*
+	* @private
+	*/
+	_hashChanged: function (hash) {
+		var $hash = (function (prop) {
+			if (!utils.isString(prop)) {
+				// some browsers do not support the newUrl property
+				// so we're forced to look at the current hash
+				prop = prop.newUrl || global.location.hash;
+			}
+			return prepare(prop);
+		})(hash);
+		if (this.listening) {
+			this.set('_current', $hash);
+			this.handle($hash);
+		}
+	},
+
+	/**
+	* @private
+	*/
+	_handlePopHistory: function (entry) {
+		if (this.listening) {
+			var location = prepare(entry.location);
+			this.handle(location);
+		}
+	},
+
+	/*
+	* @private
+	*/
+	_execHandler: function (context, handler, args, route) {
+		var $fn = handler;
+		var $ctx = 'string' === typeof context? utils.getPath.call(this, context): context;
+		// if the handler is defined as a string, we need to determine if it is relative to the
+		// router, relative to the owner, relative to the context, or a named function in the
+		// global scope
+		if ('string' === typeof handler) {
+			if (typeof this[handler] === 'function') {
+				$fn = this[handler];
+				$ctx = $ctx || this;
+			} else if (typeof this.owner[handler] === 'function') {
+				$fn = this.owner[handler];
+				$ctx = $ctx || this.owner;
+			} else if (typeof $ctx[handler] === 'function') {
+				$fn = $ctx[handler];
+			}
+			if ('function' === typeof $fn) {
+				// in case we actually found it, let's not go hunting
+				// next time
+				route.handler = $fn;
+				route.context = $ctx;
+			}
+		}
+		// if we have an actual handler, let's execute it now
+		if ($fn && 'function' === typeof $fn) {
+			$fn.apply($ctx, args);
+			return true;
+		}
+		// otherwise we couldn't determine what we were supposed to
+		// do here
+		return false;
+	},
+
+	/*
+	* @private
+	*/
+	_handleStatic: function (path) {
+		var statics = this._staticRoutes;
+		var route;
+		var handler;
+		var context;
+		if ((route = statics[path])) {
+			handler = route.handler;
+			context = route.context;
+			return this._execHandler(context, handler, [path], route);
+		}
+		return false;
+	},
+
+	/*
+	* @private
+	*/
+	_handleDynamic: function (path) {
+		var dynamic = this._dynamicRoutes;
+		var regex;
+		var route;
+		var handler;
+		var context;
+		var matches;
+		var idx = 0;
+		var len = dynamic.length;
+		for (; idx < len; ++idx) {
+			route = dynamic[idx];
+			regex = route.regex;
+			if ((matches = regex.exec(path))) {
+				// we need to strip off the full match so we can
+				// use the other matches as parameters
+				matches = matches.slice(1);
+				handler = route.handler;
+				context = route.context;
+				return this._execHandler(context, handler, matches, route);
+			}
+		}
+		return false;
+	},
+
+	/*
+	* @private
+	*/
+	_handleDefault: function (path) {
+		var route = this.defaultRoute || {};
+		var context = route.context;
+		var handler = route.handler;
+		return this._execHandler(context, handler, [path], route);
+	},
+
+	/*
+	* @private
+	*/
+	_setupRoutes: function () {
+		var routes = this.routes;
+		var idx = 0;
+		var len = routes.length;
+		var route;
+		for (; idx < len; ++idx) {
+			route = routes[idx];
+			if (!route) {
+				continue;
+			}
+			this.addRoute(route);
+		}
+	},
+
+	_currentChanged: function (was, is) {
+		this.log(was, is);
+	}
+
+});
+
+},{'./kind':'enyo/kind','./utils':'enyo/utils','./ready':'enyo/ready','./dispatcher':'enyo/dispatcher','./Controller':'enyo/Controller','./History':'enyo/History'}],'enyo/gesture':[function (module,exports,global,require,request){
 /**
 * @module enyo/gesture
 */
