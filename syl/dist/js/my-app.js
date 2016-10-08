@@ -1,5 +1,9 @@
 // Initialize your app
-var myApp = new Framework7();
+var myApp = new Framework7({
+    pushState: true,
+    swipePanel: 'left',
+    material: (window.buildPlatform === "android")
+});
 
 Parse.initialize('RXtuddMFmzKl4Z1VL98OxKUKmRyWxczNEO1XXg3Z', 'ne1XrN3l6x13UQ4itiZ3TQ9snZJcOV2zmW2EuoVp'); 
 Parse.serverURL = 'https://parseapi.back4app.com/';
