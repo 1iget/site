@@ -474,6 +474,7 @@ ready(function() {
 		],
 		showSplash: function(callback) {
 			if(!this.wasLoaded)	{
+				this.resetView();
 				this.$.splash.show();
 				setTimeout(function(){
 					this.wasLoaded = true;
@@ -487,13 +488,18 @@ ready(function() {
 			location.href = '#!signup';
 		},
 		navigateTo: function(toWhere) {
-			switch(toWhere) {
+				this.verifyUser(toWhere);
+				switch(toWhere) {
 					case 'signup': 
 						this.handleNewAccount();
 						break;
 					case 'login': 
-						this.resetView();
-						this.$.login.show();
+						if (Parse.User.current()) {
+							location.href = "#";
+						} else {
+							this.resetView();
+							this.$.login.show();
+						}
 						break;
 					case 'logout':
 						location.href="#!login"
@@ -501,13 +507,19 @@ ready(function() {
 						this.bootstrap();
 				}
 		},
-		verifyUser: function(){
+		verifyUser: function(toWhere){
 			this.showSplash(function(){
 				// check to see if user is logged in
 				if (Parse.User.current()) {
+					this.resetView();
 					this.$.chrome.show();
 				} else {
-					location.href = '#!login';
+
+					if(toWhere == 'signup') {
+			
+					} else {
+						location.href = '#!login';
+					}
 				}
 			}.bind(this));
 		},
@@ -516,7 +528,7 @@ ready(function() {
 				this.$.login.hide();
 				this.$.signup.hide();
 				this.$.chrome.hide();
-				this.$.splash.show();
+				this.$.splash.hide();
 		},
 		bootstrap: function(){
 				this.resetView();
@@ -540,11 +552,8 @@ ready(function() {
 			location.href = "#!logout"
 		},
 		handleLoggedIn: function() {
-			this.$.chrome.render();
+			this.resetView();
 			this.$.chrome.show();
-			this.$.splash.hide();
-			this.$.login.hide();
-			this.$.signup.hide();
 		}
 	});
 
