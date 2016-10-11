@@ -4414,10 +4414,10 @@ input.modal-text-input + input.modal-text-input {
   border-radius: 0%;
   -webkit-transform: scale(1);
   transform: scale(1);
-  -webkit-transition-delay: 200ms;
-  transition-delay: 200ms;
-  -webkit-transition-duration: 200ms;
-  transition-duration: 200ms;
+  -webkit-transition-delay: 0ms;
+  transition-delay: 0ms;
+  -webkit-transition-duration: 0ms;
+  transition-duration: 0ms;
 }
 .popover.popover-floating-button.modal-out {
   border-radius: 50%;
@@ -4425,8 +4425,8 @@ input.modal-text-input + input.modal-text-input {
   transform: scale(0.7);
   -webkit-transition-delay: 0ms;
   transition-delay: 0ms;
-  -webkit-transition-duration: 100ms;
-  transition-duration: 100ms;
+  -webkit-transition-duration: 0ms;
+  transition-duration: 0ms;
 }
 .popover.popover-floating-button .list-block {
   margin: 0;
@@ -4514,8 +4514,8 @@ html.pixel-ratio-3 .actions-popover-label:after {
 .login-screen.modal-in,
 .popup.modal-out,
 .login-screen.modal-out {
-  -webkit-transition-duration: 400ms;
-  transition-duration: 400ms;
+  -webkit-transition-duration: 0ms;
+  transition-duration: 0ms;
 }
 .popup.modal-in,
 .login-screen.modal-in {
