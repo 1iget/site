@@ -51,3 +51,7 @@ time.icon span
   padding-top: 0.8em;
   color: #2f2f2f;
 }
+
+.notifications {
+    z-index: 11000;
+}

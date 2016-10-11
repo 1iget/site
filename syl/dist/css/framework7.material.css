@@ -4335,7 +4335,7 @@ input.modal-text-input + input.modal-text-input {
   top: 0;
   opacity: 0;
   left: 0;
-  border-radius: 3px;
+  /*border-radius: 3px;*/
   position: absolute;
   display: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
@@ -4356,15 +4356,15 @@ input.modal-text-input + input.modal-text-input {
 .popover.modal-in {
   -webkit-transform: scale(1);
   transform: scale(1);
-  -webkit-transition-duration: 300ms;
-  transition-duration: 300ms;
+  -webkit-transition-duration: 0ms;
+  transition-duration: 0ms;
   opacity: 1;
 }
 .popover.modal-out {
   -webkit-transform: scale(1);
   transform: scale(1);
-  -webkit-transition-duration: 300ms;
-  transition-duration: 300ms;
+  -webkit-transition-duration: 0ms;
+  transition-duration: 0ms;
   opacity: 0;
 }
 .popover .list-block {
@@ -4408,26 +4408,19 @@ input.modal-text-input + input.modal-text-input {
   transform: scale(0.7);
   border-radius: 50%;
   box-shadow: none;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 .popover.popover-floating-button.modal-in {
   border-radius: 0%;
   -webkit-transform: scale(1);
   transform: scale(1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+/*.popover.popover-floating-button.modal-out {
   -webkit-transition-delay: 0ms;
   transition-delay: 0ms;
   -webkit-transition-duration: 0ms;
   transition-duration: 0ms;
-}
-.popover.popover-floating-button.modal-out {
-  border-radius: 50%;
-  -webkit-transform: scale(0.7);
-  transform: scale(0.7);
-  -webkit-transition-delay: 0ms;
-  transition-delay: 0ms;
-  -webkit-transition-duration: 0ms;
-  transition-duration: 0ms;
-}
+}*/
 .popover.popover-floating-button .list-block {
   margin: 0;
 }
@@ -4514,8 +4507,8 @@ html.pixel-ratio-3 .actions-popover-label:after {
 .login-screen.modal-in,
 .popup.modal-out,
 .login-screen.modal-out {
-  -webkit-transition-duration: 0ms;
-  transition-duration: 0ms;
+  -webkit-transition-duration: 500ms;
+  transition-duration: 500ms;
 }
 .popup.modal-in,
 .login-screen.modal-in {
