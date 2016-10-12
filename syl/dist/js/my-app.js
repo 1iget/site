@@ -1,5 +1,6 @@
 // Initialize your app
 var myApp = new Framework7({
+  modalTitle: 'Syllabus Manager',
   pushState: true,
   swipePanel: 'left',
   material: (window.buildPlatform === 'android')
