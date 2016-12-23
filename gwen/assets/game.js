@@ -66,8 +66,8 @@
 
 	Map.prototype = {
 	    preload: function () {
-	        this.game.load.tilemap('MyTilemap', '/assets/uf_gwendor_world_1.json', null, Phaser.Tilemap.TILED_JSON);
-	        this.game.load.image('uf_map', '/assets/uf_map.png');
+	        this.game.load.tilemap('MyTilemap', 'assets/uf_gwendor_world_1.json', null, Phaser.Tilemap.TILED_JSON);
+	        this.game.load.image('uf_map', 'assets/uf_map.png');
 	        this.game.load.audio('intro_rest', ['assets/music_rest.ogg']);
 	        this.game.load.audio('intro_login', ['assets/music_login.ogg']);
 	    },
